@@ -74,7 +74,7 @@ RTSWorld::updateResolutionData() {
     Vector2I appResolution = g_gameOptions().s_Resolution;
     
     m_pTiledMap->setStart(0, 0);
-    m_pTiledMap->setEnd(appResolution.x, appResolution.y - 175);
+    m_pTiledMap->setEnd(appResolution.x, appResolution.y /*- 175*/);
     
     //This ensures a clamp if necessary
     m_pTiledMap->moveCamera(0, 0);

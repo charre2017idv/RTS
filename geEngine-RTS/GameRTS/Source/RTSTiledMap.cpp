@@ -199,12 +199,70 @@ RTSTiledMap::render() {
       refTexture.draw();
     }
   }
-  
+  int framex = 1;
+  int framey = 1;
+  FrameVector<sf::Vertex> FRAME;
+  FrameVector<sf::Vertex> gridLines;
+  gridLines.reserve(((tileFinX - tileIniX) + (tileFinY - tileIniY) + 4) << 1);
+
+  sf::Color gridColor(0, 255, 0, 255);
+
+  int32 tmpX2 = 0, tmpY2 = 0;
+  for (int32 iterX = framex; iterX <= framex + 1; ++iterX) {
+    getMapToScreenCoords(iterX, framey, tmpX, tmpY);
+    getMapToScreenCoords(iterX, framey, tmpX2, tmpY2);
+#ifdef MAP_IS_ISOMETRIC
+    gridLines.push_back(sf::Vertex(
+      sf::Vector2f(static_cast<float>(tmpX + GameOptions::TILEHALFSIZE.x),
+        static_cast<float>(tmpY)),
+      gridColor));
+
+    gridLines.push_back(sf::Vertex(
+      sf::Vector2f(static_cast<float>(tmpX2),
+        static_cast<float>(tmpY2 + GameOptions::TILEHALFSIZE.y)),
+      gridColor));
+#else
+    gridLines.push_back(sf::Vertex(
+      sf::Vector2f(static_cast<float>(tmpX), static_cast<float>(tmpY)),
+      gridColor));
+
+    gridLines.push_back(sf::Vertex(sf::Vector2f(static_cast<float>(tmpX2),
+      static_cast<float>(tmpY2 + TILESIZE_Y)),
+      gridColor));
+#endif
+  }
+
+  for (int32 iterY = framey; iterY <= framey + 1; ++iterY) {
+    getMapToScreenCoords(framex, iterY, tmpX, tmpY);
+    getMapToScreenCoords(framex, iterY, tmpX2, tmpY2);
+#ifdef MAP_IS_ISOMETRIC
+    gridLines.push_back(sf::Vertex(
+      sf::Vector2f(static_cast<float>(tmpX + GameOptions::TILEHALFSIZE.x),
+        static_cast<float>(tmpY)),
+      gridColor));
+
+    gridLines.push_back(sf::Vertex(
+      sf::Vector2f(static_cast<float>(tmpX2 + TILESIZE_X),
+        static_cast<float>(tmpY2 + GameOptions::TILEHALFSIZE.y)),
+      gridColor));
+#else
+    gridLines.push_back(sf::Vertex(
+      sf::Vector2f(static_cast<float>(tmpX), static_cast<float>(tmpY)),
+      gridColor));
+
+    gridLines.push_back(sf::Vertex(sf::Vector2f(static_cast<float>(tmpX2 + TILESIZE_X),
+      static_cast<float>(tmpY2)),
+      gridColor));
+#endif
+  }
+
+  m_pTarget->draw(&gridLines[0], gridLines.size(), sf::Lines);
+ 
   if (GameOptions::s_MapShowGrid) {
     FrameVector<sf::Vertex> gridLines;
     gridLines.reserve( ((tileFinX - tileIniX) + (tileFinY - tileIniY) + 4) << 1);
 
-    sf::Color gridColor(255, 0, 0, 255);
+    sf::Color gridColor(0, 0, 255, 255);
 
     int32 tmpX2 = 0, tmpY2 = 0;
     for (int32 iterX = tileIniX; iterX <= tileFinX + 1; ++iterX) {
