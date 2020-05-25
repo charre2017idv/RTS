@@ -151,13 +151,10 @@ RTSTiledMap::getMapToScreenCoords(const int32 mapX,
 #endif
 }
 
-void
-RTSTiledMap::update(float deltaTime) {
-  GE_UNREFERENCED_PARAMETER(deltaTime);
-}
-
-void
-RTSTiledMap::render() {
+void RTSTiledMap::setCell(const int32 x, const int32 y, sf::Color _color)
+{
+  int framex = x;
+  int framey = y;
   int32 tmpX = 0;
   int32 tmpY = 0;
   int32 tmpTypeTile = 0;
@@ -177,35 +174,11 @@ RTSTiledMap::render() {
   getScreenToMapCoords(m_scrStart.x, m_scrStart.y, tileIniX, tileIniY);
   getScreenToMapCoords(m_scrEnd.x, m_scrEnd.y, tileFinX, tileFinY);
 #endif
-  for (int32 iterX = tileIniX; iterX <= tileFinX; ++iterX) {
-    for (int32 iterY = tileIniY; iterY <= tileFinY; ++iterY) {
-
-      getMapToScreenCoords(iterX, iterY, tmpX, tmpY);
-      if (tmpX > m_scrEnd.x ||
-          tmpY > m_scrEnd.y ||
-          (tmpX + TILESIZE_X) < m_scrStart.x ||
-          (tmpY + TILESIZE_X) < m_scrStart.y) {
-        continue;
-      }
-
-      tmpTypeTile = m_mapGrid[(iterY*m_mapSize.x) + iterX].getType();
-      RTSTexture& refTexture = m_mapTextures[tmpTypeTile];
-
-      clipRect.x = (iterX << GameOptions::BITSHFT_TILESIZE.x) % refTexture.getWidth();
-      clipRect.y = (iterY << GameOptions::BITSHFT_TILESIZE.y) % refTexture.getHeight();
-
-      refTexture.setPosition(tmpX, tmpY);
-      refTexture.setSrcRect(clipRect.x, clipRect.y, TILESIZE_X, TILESIZE_Y);
-      refTexture.draw();
-    }
-  }
-  int framex = 1;
-  int framey = 1;
   FrameVector<sf::Vertex> FRAME;
   FrameVector<sf::Vertex> gridLines;
   gridLines.reserve(((tileFinX - tileIniX) + (tileFinY - tileIniY) + 4) << 1);
 
-  sf::Color gridColor(0, 255, 0, 255);
+  sf::Color gridColor = _color;
 
   int32 tmpX2 = 0, tmpY2 = 0;
   for (int32 iterX = framex; iterX <= framex + 1; ++iterX) {
@@ -257,6 +230,56 @@ RTSTiledMap::render() {
   }
 
   m_pTarget->draw(&gridLines[0], gridLines.size(), sf::Lines);
+}
+
+void
+RTSTiledMap::update(float deltaTime) {
+  GE_UNREFERENCED_PARAMETER(deltaTime);
+}
+
+void
+RTSTiledMap::render() {
+  int32 tmpX = 0;
+  int32 tmpY = 0;
+  int32 tmpTypeTile = 0;
+  Vector2I clipRect;
+
+  int32 tileIniX = 0, tileIniY = 0;
+  int32 tileFinX = 0, tileFinY = 0;
+
+#ifdef MAP_IS_ISOMETRIC
+  int32 trashCoord = 0;
+  getScreenToMapCoords(m_scrStart.x, m_scrStart.y, tileIniX, trashCoord);
+  getScreenToMapCoords(m_scrEnd.x, m_scrEnd.y, tileFinX, trashCoord);
+
+  getScreenToMapCoords(m_scrEnd.x, m_scrStart.y, trashCoord, tileIniY);
+  getScreenToMapCoords(m_scrStart.x, m_scrEnd.y, trashCoord, tileFinY);
+#else
+  getScreenToMapCoords(m_scrStart.x, m_scrStart.y, tileIniX, tileIniY);
+  getScreenToMapCoords(m_scrEnd.x, m_scrEnd.y, tileFinX, tileFinY);
+#endif
+  for (int32 iterX = tileIniX; iterX <= tileFinX; ++iterX) {
+    for (int32 iterY = tileIniY; iterY <= tileFinY; ++iterY) {
+
+      getMapToScreenCoords(iterX, iterY, tmpX, tmpY);
+      if (tmpX > m_scrEnd.x ||
+          tmpY > m_scrEnd.y ||
+          (tmpX + TILESIZE_X) < m_scrStart.x ||
+          (tmpY + TILESIZE_X) < m_scrStart.y) {
+        continue;
+      }
+
+      tmpTypeTile = m_mapGrid[(iterY*m_mapSize.x) + iterX].getType();
+      RTSTexture& refTexture = m_mapTextures[tmpTypeTile];
+
+      clipRect.x = (iterX << GameOptions::BITSHFT_TILESIZE.x) % refTexture.getWidth();
+      clipRect.y = (iterY << GameOptions::BITSHFT_TILESIZE.y) % refTexture.getHeight();
+
+      refTexture.setPosition(tmpX, tmpY);
+      refTexture.setSrcRect(clipRect.x, clipRect.y, TILESIZE_X, TILESIZE_Y);
+      refTexture.draw();
+    }
+  }
  
   if (GameOptions::s_MapShowGrid) {
     FrameVector<sf::Vertex> gridLines;

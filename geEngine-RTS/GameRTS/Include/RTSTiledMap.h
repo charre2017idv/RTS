@@ -161,6 +161,9 @@ class RTSTiledMap
                        int32 &scrX,
                        int32 &scrY);
 
+  void 
+  setCell(const int32 x, const int32 y, sf::Color _color);
+
  private:
   Vector2I m_mapSize;
   Vector<MapTile> m_mapGrid;

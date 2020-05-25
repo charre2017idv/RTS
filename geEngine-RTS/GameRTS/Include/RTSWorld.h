@@ -2,7 +2,7 @@
 
 #include <gePrerequisitesUtil.h>
 #include <geVector2I.h>
-
+#include <RTSPathfinding.h>
 #include <SFML/Graphics.hpp>
 
 using namespace geEngineSDK;
@@ -52,4 +52,6 @@ class RTSWorld
   int8 m_activeWalkerIndex;
 
   sf::RenderTarget* m_pTarget;
+
+  RTSPathfinding path;
 };

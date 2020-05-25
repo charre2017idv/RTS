@@ -36,9 +36,12 @@ RTSWorld::init(sf::RenderTarget* pTarget) {
   //Set the first walker as the active walker
   setCurrentWalker(m_walkersList.size() > 0 ? 0 : -1);
 */
+  
 
   RTSGame::RTSUnitType unitTypes;
   unitTypes.loadAnimationData(m_pTarget, 1);
+
+  path.init(m_pTiledMap);
 
   return true;
 }
@@ -56,6 +59,8 @@ RTSWorld::destroy() {
     ge_delete(m_pTiledMap);
     m_pTiledMap = nullptr;
   }
+
+  path.destroy();
 }
 
 void
@@ -66,6 +71,7 @@ RTSWorld::update(float deltaTime) {
 void
 RTSWorld::render() {
   m_pTiledMap->render(); 
+  path.render();
 }
 
 void
