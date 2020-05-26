@@ -41,7 +41,7 @@ RTSWorld::init(sf::RenderTarget* pTarget) {
   RTSGame::RTSUnitType unitTypes;
   unitTypes.loadAnimationData(m_pTarget, 1);
 
-  path.init(m_pTiledMap);
+  m_dfs.init(m_pTiledMap);
 
   return true;
 }
@@ -60,18 +60,19 @@ RTSWorld::destroy() {
     m_pTiledMap = nullptr;
   }
 
-  path.destroy();
+  m_dfs.destroy();
 }
 
 void
 RTSWorld::update(float deltaTime) {
   m_pTiledMap->update(deltaTime);
+  m_dfs.update(deltaTime);
 }
 
 void
 RTSWorld::render() {
   m_pTiledMap->render(); 
-  path.render();
+  m_dfs.render();
 }
 
 void

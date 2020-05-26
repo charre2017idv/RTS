@@ -153,8 +153,6 @@ RTSTiledMap::getMapToScreenCoords(const int32 mapX,
 
 void RTSTiledMap::setCell(const int32 x, const int32 y, sf::Color _color)
 {
-  int framex = x;
-  int framey = y;
   int32 tmpX = 0;
   int32 tmpY = 0;
   int32 tmpTypeTile = 0;
@@ -181,9 +179,9 @@ void RTSTiledMap::setCell(const int32 x, const int32 y, sf::Color _color)
   sf::Color gridColor = _color;
 
   int32 tmpX2 = 0, tmpY2 = 0;
-  for (int32 iterX = framex; iterX <= framex + 1; ++iterX) {
-    getMapToScreenCoords(iterX, framey, tmpX, tmpY);
-    getMapToScreenCoords(iterX, framey, tmpX2, tmpY2);
+  for (int32 iterX = x; iterX <= x + 1; ++iterX) {
+    getMapToScreenCoords(iterX, y, tmpX, tmpY);
+    getMapToScreenCoords(iterX, y, tmpX2, tmpY2);
 #ifdef MAP_IS_ISOMETRIC
     gridLines.push_back(sf::Vertex(
       sf::Vector2f(static_cast<float>(tmpX + GameOptions::TILEHALFSIZE.x),
@@ -205,9 +203,9 @@ void RTSTiledMap::setCell(const int32 x, const int32 y, sf::Color _color)
 #endif
   }
 
-  for (int32 iterY = framey; iterY <= framey + 1; ++iterY) {
-    getMapToScreenCoords(framex, iterY, tmpX, tmpY);
-    getMapToScreenCoords(framex, iterY, tmpX2, tmpY2);
+  for (int32 iterY = y; iterY <= y + 1; ++iterY) {
+    getMapToScreenCoords(x, iterY, tmpX, tmpY);
+    getMapToScreenCoords(x, iterY, tmpX2, tmpY2);
 #ifdef MAP_IS_ISOMETRIC
     gridLines.push_back(sf::Vertex(
       sf::Vector2f(static_cast<float>(tmpX + GameOptions::TILEHALFSIZE.x),
@@ -231,6 +229,12 @@ void RTSTiledMap::setCell(const int32 x, const int32 y, sf::Color _color)
 
   m_pTarget->draw(&gridLines[0], gridLines.size(), sf::Lines);
 }
+
+FrameVector<sf::Vertex> RTSTiledMap::getCell()
+{
+  return FrameVector<sf::Vertex>();
+}
+
 
 void
 RTSTiledMap::update(float deltaTime) {
@@ -342,7 +346,7 @@ RTSTiledMap::render() {
 
 RTSTiledMap::MapTile::MapTile() {
   m_idType = 1;
-  m_cost = 1;
+  m_cost = 0;
 }
 
 RTSTiledMap::MapTile::MapTile(const int8 idType, const int8 cost) {

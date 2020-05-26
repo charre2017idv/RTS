@@ -3,6 +3,7 @@
 #include <gePrerequisitesUtil.h>
 #include <geVector2I.h>
 #include <RTSPathfinding.h>
+#include <DFS.h>
 #include <SFML/Graphics.hpp>
 
 using namespace geEngineSDK;
@@ -53,5 +54,7 @@ class RTSWorld
 
   sf::RenderTarget* m_pTarget;
 
-  RTSPathfinding path;
+  //RTSPathfinding path;
+
+  DFS m_dfs;
 };

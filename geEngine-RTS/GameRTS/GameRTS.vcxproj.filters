@@ -50,6 +50,15 @@
     <ClCompile Include="Source\RTSPathfinding.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\AStar.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\DFS.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\BFS.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\RTSUnitType.h">
@@ -94,5 +103,12 @@
     <ClInclude Include="Include\RTSPathfinding.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="Include\AStar.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\DFS.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\BFS.h" />
   </ItemGroup>
 </Project>

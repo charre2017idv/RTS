@@ -20,22 +20,37 @@ class RTSPathfinding
 public:
 	RTSPathfinding();
 	~RTSPathfinding();
+	void
+	init(RTSTiledMap * _pTiledMap);
+	
+	void
+	update(float deltaTime);
+	
+	void
+	render();
+	
+	void
+	destroy();
 
-private:
+	RTSTiledMap*
+	getTileMap() 
+	{
+		return m_pTiledMap;
+	};
+
+	void
+	checkIfNodeReachTheEnd();
+
+	bool
+  CheckIfIsEqualToLastNode();
+public:
+	int m_gridSize;
 	Vector2I m_IPos;
 	Vector2I m_FPos;
+	Vector2I m_nextPos;
+	Vector2I m_lastPos;
 	RTSTiledMap* m_pTiledMap;
-public:
-
-void
-init(RTSTiledMap * _pTiledMap);
-
-void
-update(float deltaTime);
-
-void
-render();
-
-void
-destroy();
+	vector<Vector2I> OpenList;
+	vector<Vector2I> CloseList;
+	bool m_hasFinish = false;
 };

@@ -164,6 +164,16 @@ class RTSTiledMap
   void 
   setCell(const int32 x, const int32 y, sf::Color _color);
 
+  FrameVector<sf::Vertex>
+  getCell();
+
+  MapTile
+    getMapGridCell(int x, int y)
+  {
+    GE_ASSERT((x >= 0) && (x < m_mapSize.x) && (y >= 0) && (y < m_mapSize.y));
+    return m_mapGrid[(y * m_mapSize.x) + x];
+  };
+
  private:
   Vector2I m_mapSize;
   Vector<MapTile> m_mapGrid;
