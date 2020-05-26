@@ -17,31 +17,17 @@ void DFS::init(RTSTiledMap* _pTiledMap)
 void DFS::update(float deltaTime)
 {
 	RTSPathfinding::update(deltaTime);
-}
-
-void DFS::render()
-{
-	RTSPathfinding::render();
-	//	m_pTiledMap->setCell(m_lastPos.x, m_lastPos.y+1, sf::Color().Yellow);
-	for (size_t i = 0; i < OpenList.size(); i++)
-	{
-		m_pTiledMap->setCell(OpenList[i].x, OpenList[i].y, sf::Color().Magenta);
-	}
-	while (!RTSPathfinding::m_hasFinish)
-	{
-		
-		switch (state)
+		switch (state && !m_hasFinish)
 		{
 		case 0 :
-			//(m_lastPos.x >= 0) && (m_lastPos.x < (m_pTiledMap->getMapSize().x) && (m_lastPos.y + 1 >= 0) && (m_lastPos.y + 1 < m_pTiledMap->getMapSize().y) &&
-			if ( m_pTiledMap->getMapGridCell(m_lastPos.x, m_lastPos.y + 1).getCost() == 0 ) // Up
+			if ( m_pTiledMap->getMapGridCell(m_lastPos.x, m_lastPos.y + 1).getCost() == 0 && (m_lastPos.x >= 0 && m_lastPos.x <= m_pTiledMap->getMapSize().x) && (m_lastPos.y +1 >= 0 && m_lastPos.y + 1 <= m_pTiledMap->getMapSize().y)) // Up
 			{
-				RTSPathfinding::checkIfNodeReachTheEnd();
 				m_nextPos = { m_lastPos.x, m_lastPos.y + 1 };
 				m_pTiledMap->setCell(m_nextPos.x, m_nextPos.y, sf::Color().Yellow);
 				OpenList.push_back(m_nextPos);
 				m_lastPos = m_nextPos;
 				state = 0;
+				RTSPathfinding::checkIfNodeReachTheEnd();
 			}
 			else
 			{
@@ -49,15 +35,14 @@ void DFS::render()
 			}
 			break;
 		case 1:
-			// (m_lastPos.x + 1 >= 0) && (m_lastPos.x + 1 < (m_pTiledMap->getMapSize().x) && (m_lastPos.y >= 0) && (m_lastPos.y < m_pTiledMap->getMapSize().y) &&
-			if ( m_pTiledMap->getMapGridCell(m_lastPos.x + 1, m_lastPos.y).getCost() == 0) // Right
+			if ( m_pTiledMap->getMapGridCell(m_lastPos.x + 1, m_lastPos.y).getCost() == 0 && (m_lastPos.x + 1 >= 0 && m_lastPos.x + 1<= m_pTiledMap->getMapSize().x) && (m_lastPos.y >= 0 && m_lastPos.y <= m_pTiledMap->getMapSize().y)) // Right
 			{
-				RTSPathfinding::checkIfNodeReachTheEnd();
 				m_nextPos = { m_lastPos.x + 1, m_lastPos.y };
 				m_pTiledMap->setCell(m_nextPos.x, m_nextPos.y, sf::Color().Yellow);
 				OpenList.push_back(m_nextPos);
 				m_lastPos = m_nextPos;
 				state = 0;
+				RTSPathfinding::checkIfNodeReachTheEnd();
 			}
 			else
 			{
@@ -65,15 +50,14 @@ void DFS::render()
 			}
 			break;
 		case 2:
-			// (m_lastPos.x >= 0) && (m_lastPos.x < (m_pTiledMap->getMapSize().x) && (m_lastPos.y - 1 >= 0) && (m_lastPos.y - 1 < m_pTiledMap->getMapSize().y) &&
-			if ( m_pTiledMap->getMapGridCell(m_lastPos.x, m_lastPos.y - 1).getCost() == 0 ) // Down
+			if ( m_pTiledMap->getMapGridCell(m_lastPos.x, m_lastPos.y - 1).getCost() == 0 && (m_lastPos.x >= 0 && m_lastPos.x <= m_pTiledMap->getMapSize().x) && (m_lastPos.y - 1 >= 0 && m_lastPos.y - 1 <= m_pTiledMap->getMapSize().y)) // Down
 			{
-				RTSPathfinding::checkIfNodeReachTheEnd();
 				m_nextPos = { m_lastPos.x, m_lastPos.y - 1 };
 				m_pTiledMap->setCell(m_nextPos.x, m_nextPos.y, sf::Color().Yellow);
 				OpenList.push_back(m_nextPos);
 				m_lastPos = m_nextPos;
 				state = 0;
+				RTSPathfinding::checkIfNodeReachTheEnd();
 			}
 			else
 			{
@@ -81,15 +65,14 @@ void DFS::render()
 			}
 			break;
 		case 3:
-			// (m_lastPos.x - 1 >= 0) && (m_lastPos.x - 1 < (m_pTiledMap->getMapSize().x) && (m_lastPos.y >= 0) && (m_lastPos.y < m_pTiledMap->getMapSize().y) &&
-			if ( m_pTiledMap->getMapGridCell(m_lastPos.x - 1, m_lastPos.y).getCost() == 0 && !RTSPathfinding::CheckIfIsEqualToLastNode()) // Up
+			if ( m_pTiledMap->getMapGridCell(m_lastPos.x - 1, m_lastPos.y).getCost() == 0 && (m_lastPos.x - 1 >= 0 && m_lastPos.x - 1 <= m_pTiledMap->getMapSize().x) && (m_lastPos.y >= 0 && m_lastPos.y <= m_pTiledMap->getMapSize().y)) // Up
 			{
-				RTSPathfinding::checkIfNodeReachTheEnd();
 				m_nextPos = { m_lastPos.x - 1, m_lastPos.y };
 				m_pTiledMap->setCell(m_nextPos.x, m_nextPos.y, sf::Color().Yellow);
 				OpenList.push_back(m_nextPos);
 				m_lastPos = m_nextPos;
 				state = 0;
+				RTSPathfinding::checkIfNodeReachTheEnd();
 			}
 			else
 			{
@@ -99,7 +82,30 @@ void DFS::render()
 		default:
 			break;
 		}
-		
+	//while (!RTSPathfinding::m_hasFinish)
+	//{
+	//	
+	//}
+}
+
+void DFS::render()
+{
+	RTSPathfinding::render();
+	//	m_pTiledMap->setCell(m_lastPos.x, m_lastPos.y+1, sf::Color().Yellow);
+	
+	if (m_hasFinish)
+	{
+		for (size_t i = 0; i < OpenList.size(); i++)
+		{
+			m_pTiledMap->setCell(OpenList[i].x, OpenList[i].y, sf::Color().Magenta);
+		}
+	}
+	else
+	{
+		for (size_t i = 0; i < OpenList.size(); i++)
+		{
+			m_pTiledMap->setCell(OpenList[i].x, OpenList[i].y, sf::Color().Yellow);
+		}
 	}
 	//for (size_t i = 0; i < RTSPathfinding::m_gridSize ; i++)
 	//{

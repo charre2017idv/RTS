@@ -72,6 +72,7 @@ RTSWorld::update(float deltaTime) {
 void
 RTSWorld::render() {
   m_pTiledMap->render(); 
+  m_dfs.OpenList.push_back(m_dfs.m_IPos);
   m_dfs.render();
 }
 
