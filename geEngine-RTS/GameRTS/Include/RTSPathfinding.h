@@ -15,6 +15,15 @@ struct Node
 	float hCost;
 };
 
+enum Dir
+{
+	Default,
+	Up,
+	Right,
+	Down,
+	Left
+};
+
 class RTSPathfinding
 {
 public:
@@ -49,8 +58,10 @@ public:
 	Vector2I m_FPos;
 	Vector2I m_nextPos;
 	Vector2I m_lastPos;
+	Vector2I m_actualPos;
 	RTSTiledMap* m_pTiledMap;
 	vector<Vector2I> OpenList;
 	vector<Vector2I> CloseList;
 	bool m_hasFinish = false;
+	Dir m_direction;
 };

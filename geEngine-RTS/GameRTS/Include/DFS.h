@@ -21,6 +21,22 @@ public:
 
 	void
 	destroy();
+
+	void 
+	CheckUp();
+	
+	void 
+	CheckUpDefault();
+	
+	void 
+
+	CheckRight();
+	
+	void 
+	CheckDown();
+
+	void 
+	CheckLeft();
 public:
 	RTSTiledMap* m_pTiledMap;
 	int state = 0;

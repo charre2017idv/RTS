@@ -14,9 +14,9 @@ void RTSPathfinding::init(RTSTiledMap * _pTiledMap)
   m_pTiledMap = _pTiledMap;
 
   m_IPos = { 1,1 };
-  m_FPos = { 4,4 };
+  m_FPos = { 3,2};
 
-  m_lastPos = m_IPos;
+  m_lastPos = { 0,0 };
   m_nextPos = { 0,0 };
 
   // Left
@@ -91,7 +91,7 @@ void RTSPathfinding::checkIfNodeReachTheEnd()
 
 bool RTSPathfinding::CheckIfIsEqualToLastNode()
 {
-  if (m_nextPos == m_lastPos)
+  if (m_nextPos == m_actualPos)
   {
     return true;
   }
