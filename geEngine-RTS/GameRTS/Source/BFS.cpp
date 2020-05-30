@@ -68,9 +68,7 @@ void BFS::render()
 	}
 	else {
 	}*/
-		for (size_t i = 0; i < OpenList.size(); i++) {
-			m_pTiledMap->setCell(OpenList[i].x, OpenList[i].y, sf::Color().Yellow);
-		}
+		
 }
 
 void BFS::destroy()

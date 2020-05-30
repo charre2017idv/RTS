@@ -10,6 +10,8 @@ RTSTiledMap::RTSTiledMap() {
   m_scrEnd = Vector2I::ZERO;
   m_iCamera = Vector2I::ZERO;
   m_fCamera = Vector2::ZERO;
+  m_InitialPos = Vector2I::ZERO;
+  m_FinalPos = Vector2I::ZERO;
 }
 
 RTSTiledMap::RTSTiledMap(sf::RenderTarget* pTarget, const Vector2I& mapSize) {
@@ -45,6 +47,26 @@ RTSTiledMap::init(sf::RenderTarget* pTarget, const Vector2I& mapSize) {
     //m_mapTextures[i].setColor(255,0,0,255);
   }
   preCalc();
+
+  for (int i = 0; i < getMapSize().x; i++)
+  {
+    setCost(i, 0, 1);
+    for (int j = 0; j < getMapSize().y; j++)
+    {
+      setCost(0, j, 1);
+    }
+  }
+
+
+  //setCost(2, 2, 1);
+  //setCost(2, 3, 1);
+  //setCost(1, 5, 1);
+  //setCost(3, 4, 1);
+  //setCost(3, 5, 1);
+  //setCost(4, 1, 1);
+  //setCost(4, 4, 1);
+  //setCost(6, 2, 1);
+  //setCost(6, 5, 1);
 
   m_terrainType = TERRAIN_TYPE::E::kWater;
   return true;
@@ -302,7 +324,7 @@ void
 RTSTiledMap::update(float deltaTime) {
   GE_UNREFERENCED_PARAMETER(deltaTime);
   m_timeToNext += deltaTime;
-
+  //m_dfs.update(deltaTime);
 }
 
 void
@@ -429,9 +451,9 @@ RTSTiledMap::render() {
     setCell(m_selectedTileX, m_selectedTileY, sf::Color().Yellow);
   }
 
-  if (m_InitialPos.x <= -1 || m_InitialPos.y <= -1 && m_FinalPos.x <= -1 || m_FinalPos.y <= -1)
+  if (m_InitialPos.x <= -1 || m_InitialPos.y <= -1)
   {
-    return;
+   // return;
   }
   else
   {
@@ -440,20 +462,22 @@ RTSTiledMap::render() {
 
   if (m_FinalPos.x <= -1 || m_FinalPos.y <= -1)
   {
-    return;
+    //return;
   }
   else
   {
     setCell(m_FinalPos.x, m_FinalPos.y, sf::Color().Red);
   }
 
+
+  // Draw the Tiles of the greed
   for (int i = 0; i < getMapSize().x; i++)
   {
     for (int j = 0; j < getMapSize().y; j++)
     {
       // Grass
       if (getMapGridCell(i, j).getCost() == 3) {
-        setCell(i, j, sf::Color().Green);
+        setCell(i, j, sf::Color().Transparent);
       }
       // Water
       if (getMapGridCell(i, j).getCost() == 2) {
@@ -464,11 +488,13 @@ RTSTiledMap::render() {
         setCell(i, j, sf::Color().White);
       }
       // Obstacle
-      if (getMapGridCell(i, j).getCost() == 10) {
+      if (getMapGridCell(i, j).getCost() == 1) {
         setCell(i, j, sf::Color().Black);
       }
     }
   }
+
+  //m_dfs.render();
 }
 
 RTSTiledMap::MapTile::MapTile() {

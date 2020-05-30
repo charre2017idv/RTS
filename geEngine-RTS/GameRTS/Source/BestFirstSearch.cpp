@@ -58,9 +58,9 @@ void BestFirstSearch::update(float deltaTime)
 void BestFirstSearch::render()
 {
 	RTSPathfinding::render();
-	for (size_t i = 0; i < OpenList.size(); i++) {
+	/*for (size_t i = 0; i < OpenList.size(); i++) {
 		m_pTiledMap->setCell(OpenList[i].x, OpenList[i].y, sf::Color().Yellow);
-	}
+	}*/
 }
 
 void BestFirstSearch::destroy()

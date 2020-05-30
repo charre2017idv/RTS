@@ -5,7 +5,7 @@
 #include <geVector2I.h>
 
 #include <SFML/Graphics.hpp>
-
+#include "DFS.h"
 #include "RTSConfig.h"
 
 using namespace geEngineSDK;
@@ -199,20 +199,17 @@ class RTSTiledMap
   float m_timeToNext = 0.0f;
   RTSTiledMap* m_parent;
   Vector2I m_position;
-  Vector2 m_InitialPos;
-  Vector2 m_FinalPos;
+  Vector2I m_InitialPos;
+  Vector2I m_FinalPos;
 
-  float m_selectedTileX;
-  float m_selectedTileY;
+  int m_selectedTileX;
+  int m_selectedTileY;
   float m_selectedTileByIndex;
 
   Vector2 mousePosition;
 
-  vector<Vector2> m_tiles;
-  vector<Vector2> m_water;
-  vector<Vector2> m_grass;
-  vector<Vector2> m_marsh;
-  vector<Vector2> m_obstacle;
+  vector<Vector2I> m_tiles;
   TERRAIN_TYPE::E m_terrainType;
 
+  DFS m_dfs;
 };

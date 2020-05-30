@@ -37,6 +37,11 @@ class RTSApplication
     return s_terrain;
   }
 
+  bool& getResetPosition()
+  {
+    return m_resetPos;
+  }
+
  protected:
 
  private:
@@ -68,6 +73,7 @@ class RTSApplication
    sf::RenderWindow* m_window;
    sf::Font* m_arialFont;
    RTSWorld m_gameWorld;
+   bool m_resetPos = false;
    // Terrain type
    int s_terrain;
    float m_fpsTimer;

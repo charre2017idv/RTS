@@ -58,8 +58,8 @@ class RTSWorld
 
   //RTSPathfinding path;
 
-  DFS m_dfs;
-  BFS m_bfs;
-  BestFirstSearch m_bestFS;
-  int state = 2;
+  //DFS m_dfs;
+  //BFS m_bfs;
+  //BestFirstSearch m_bestFS;
+  int state = 1;
 };

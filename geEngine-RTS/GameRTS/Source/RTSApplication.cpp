@@ -142,7 +142,7 @@ RTSApplication::gameLoop() {
             m_gameWorld.getTiledMap()->m_selectedTileY };
         }
 
-        switch (m_gameWorld.getTiledMap()->m_terrainType)
+        switch (s_terrain)
         {
         case TERRAIN_TYPE::E::kGrass :
           m_gameWorld.getTiledMap()->setCost(
@@ -169,7 +169,7 @@ RTSApplication::gameLoop() {
           m_gameWorld.getTiledMap()->setCost(
             m_gameWorld.getTiledMap()->m_selectedTileX,
             m_gameWorld.getTiledMap()->m_selectedTileY,
-            10
+            1
           );
           break;
 
@@ -178,7 +178,7 @@ RTSApplication::gameLoop() {
         }
 
         m_gameWorld.getTiledMap()->m_tiles.push_back(
-          Vector2{
+          Vector2I{
             m_gameWorld.getTiledMap()->m_selectedTileX,
             m_gameWorld.getTiledMap()->m_selectedTileY
           });
@@ -258,7 +258,13 @@ RTSApplication::updateFrame() {
   axisMovement *= GameOptions::s_MapMovementSpeed * deltaTime;
 
   m_gameWorld.getTiledMap()->moveCamera(axisMovement.x, axisMovement.y);
-  m_gameWorld.getTiledMap()->m_terrainType = (TERRAIN_TYPE::E)s_terrain;
+  
+  if (m_resetPos)
+  {
+    m_gameWorld.getTiledMap()->m_InitialPos = Vector2I::ZERO;
+    m_gameWorld.getTiledMap()->m_FinalPos = Vector2I::ZERO;
+    m_resetPos = false;
+  }
   //Update the world
   m_gameWorld.update(deltaTime);
 }
@@ -393,30 +399,6 @@ mainMenu(RTSApplication* pApp) {
         if (is_selected)
         {
           ImGui::SetItemDefaultFocus();
-          /*if (current_item == "Inital Position")
-          {
-            
-          }
-          if (current_item == "Final Position")
-          {
-
-          }
-          if (current_item == "Water")
-          {
-            pApp->getTerrainID() = 0;
-          }
-          if (current_item == "Grass")
-          {
-            pApp->getTerrainID() = 1;
-          }
-          if (current_item == "Marsh")
-          {
-            pApp->getTerrainID() = 2;
-          }
-          if (current_item == "Obstacle")
-          {
-            pApp->getTerrainID() = 3;
-          }*/
         }
       }
       ImGui::EndCombo();
@@ -432,6 +414,13 @@ mainMenu(RTSApplication* pApp) {
     }
     ImGui::SameLine(0, style.ItemInnerSpacing.x);
     ImGui::Text("Custom Combo");
+  }
+  ImGui::End();
+  ImGui::Begin("Game Options");
+  {
+    if (ImGui::Button("Reset Positions")) {
+      pApp->getResetPosition() = true;
+    }
   }
   ImGui::End();
 }
