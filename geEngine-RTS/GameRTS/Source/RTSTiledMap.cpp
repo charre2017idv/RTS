@@ -42,10 +42,11 @@ RTSTiledMap::init(sf::RenderTarget* pTarget, const Vector2I& mapSize) {
     textureName = "Textures/Terrain/terrain_" + toString(i) + ".png";
 #endif
     m_mapTextures[i].loadFromFile(m_pTarget, textureName);
+    //m_mapTextures[i].setColor(255,0,0,255);
   }
-
   preCalc();
 
+  m_terrainType = TERRAIN_TYPE::E::kWater;
   return true;
 }
 
@@ -227,22 +228,13 @@ void RTSTiledMap::setCell(const int32 x, const int32 y, sf::Color _color)
 #endif
   }
 
+
   m_pTarget->draw(&gridLines[0], gridLines.size(), sf::Lines);
+  
 }
 
-FrameVector<sf::Vertex> RTSTiledMap::getCell()
+void RTSTiledMap::colorCell(const int32 x, const int32 y)
 {
-  return FrameVector<sf::Vertex>();
-}
-
-
-void
-RTSTiledMap::update(float deltaTime) {
-  GE_UNREFERENCED_PARAMETER(deltaTime);
-}
-
-void
-RTSTiledMap::render() {
   int32 tmpX = 0;
   int32 tmpY = 0;
   int32 tmpTypeTile = 0;
@@ -267,18 +259,103 @@ RTSTiledMap::render() {
 
       getMapToScreenCoords(iterX, iterY, tmpX, tmpY);
       if (tmpX > m_scrEnd.x ||
+        tmpY > m_scrEnd.y ||
+        (tmpX + TILESIZE_X) < m_scrStart.x ||
+        (tmpY + TILESIZE_X) < m_scrStart.y) {
+        continue;
+      }
+
+      tmpTypeTile = m_mapGrid[(iterY * m_mapSize.x) + iterX].getType();
+      RTSTexture& refTexture = m_mapTextures[tmpTypeTile];
+      refTexture.setColor(255, 0, 0, 255);
+      clipRect.x = (iterX << GameOptions::BITSHFT_TILESIZE.x) % refTexture.getWidth();
+      clipRect.y = (iterY << GameOptions::BITSHFT_TILESIZE.y) % refTexture.getHeight();
+
+      refTexture.setPosition(tmpX, tmpY);
+      refTexture.setSrcRect(clipRect.x, clipRect.y, TILESIZE_X, TILESIZE_Y);
+      refTexture.draw();
+    }
+  }
+}
+
+FrameVector<sf::Vertex> RTSTiledMap::getCell()
+{
+  return FrameVector<sf::Vertex>();
+}
+
+sf::Vector2f RTSTiledMap::getMouseOnRenderTarget()
+{
+  Vector2I mousePositionVI;
+  sf::RenderWindow& refTowindow = *static_cast<sf::RenderWindow*>(m_pTarget);
+  mousePositionVI.x = sf::Mouse::getPosition(refTowindow).x;
+  mousePositionVI.y = sf::Mouse::getPosition(refTowindow).y;
+
+  sf::Vector2i mousePosToPixel;
+  mousePosToPixel.x = mousePositionVI.x;
+  mousePosToPixel.y = mousePositionVI.y;
+  sf::Vector2f mouseInTargetSpace = m_pTarget->mapPixelToCoords(mousePosToPixel);
+  return mouseInTargetSpace;
+}
+
+
+void
+RTSTiledMap::update(float deltaTime) {
+  GE_UNREFERENCED_PARAMETER(deltaTime);
+  m_timeToNext += deltaTime;
+
+}
+
+void
+RTSTiledMap::render() {
+  int32 tmpX = 0;
+  int32 tmpY = 0;
+  int32 tmpTypeTile = 0;
+  Vector2I clipRect;
+
+  int32 tileIniX = 0, tileIniY = 0;
+  int32 tileFinX = 0, tileFinY = 0;
+
+#ifdef MAP_IS_ISOMETRIC
+  int32 trashCoord = 0;
+  getScreenToMapCoords(m_scrStart.x, m_scrStart.y, tileIniX, trashCoord);
+  getScreenToMapCoords(m_scrEnd.x, m_scrEnd.y, tileFinX, trashCoord);
+
+  getScreenToMapCoords(m_scrEnd.x, m_scrStart.y, trashCoord, tileIniY);
+  getScreenToMapCoords(m_scrStart.x, m_scrEnd.y, trashCoord, tileFinY);
+#else
+  getScreenToMapCoords(m_scrStart.x, m_scrStart.y, tileIniX, tileIniY);
+  getScreenToMapCoords(m_scrEnd.x, m_scrEnd.y, tileFinX, tileFinY);
+#endif
+
+
+  for (int32 iterX = tileIniX; iterX <= tileFinX; ++iterX) {
+    for (int32 iterY = tileIniY; iterY <= tileFinY; ++iterY) {
+
+      getMapToScreenCoords(iterX, iterY, tmpX, tmpY);
+      if (tmpX > m_scrEnd.x ||
           tmpY > m_scrEnd.y ||
           (tmpX + TILESIZE_X) < m_scrStart.x ||
           (tmpY + TILESIZE_X) < m_scrStart.y) {
         continue;
       }
 
+      
+      mousePosition.x = getMouseOnRenderTarget().x;
+      mousePosition.y = getMouseOnRenderTarget().y;
+      if (tmpX < mousePosition.x && tmpX + TILESIZE_X > mousePosition.x && 
+          tmpY < mousePosition.y && tmpY + TILESIZE_Y > mousePosition.y)
+      {
+        m_selectedTileX = iterX;
+        m_selectedTileY = iterY;
+        m_selectedTileByIndex = (iterY * m_mapSize.x) + iterX;
+      }
+
       tmpTypeTile = m_mapGrid[(iterY*m_mapSize.x) + iterX].getType();
       RTSTexture& refTexture = m_mapTextures[tmpTypeTile];
-
       clipRect.x = (iterX << GameOptions::BITSHFT_TILESIZE.x) % refTexture.getWidth();
       clipRect.y = (iterY << GameOptions::BITSHFT_TILESIZE.y) % refTexture.getHeight();
 
+      //refTexture.setColor(255, 0, 0, 255);
       refTexture.setPosition(tmpX, tmpY);
       refTexture.setSrcRect(clipRect.x, clipRect.y, TILESIZE_X, TILESIZE_Y);
       refTexture.draw();
@@ -341,6 +418,56 @@ RTSTiledMap::render() {
     }
 
     m_pTarget->draw(&gridLines[0], gridLines.size(), sf::Lines);
+  }
+
+  if (m_selectedTileX <= -1 || m_selectedTileY <= -1)
+  {
+    return;
+  }
+  else
+  {
+    setCell(m_selectedTileX, m_selectedTileY, sf::Color().Yellow);
+  }
+
+  if (m_InitialPos.x <= -1 || m_InitialPos.y <= -1 && m_FinalPos.x <= -1 || m_FinalPos.y <= -1)
+  {
+    return;
+  }
+  else
+  {
+    setCell(m_InitialPos.x, m_InitialPos.y, sf::Color().Green);
+  }
+
+  if (m_FinalPos.x <= -1 || m_FinalPos.y <= -1)
+  {
+    return;
+  }
+  else
+  {
+    setCell(m_FinalPos.x, m_FinalPos.y, sf::Color().Red);
+  }
+
+  for (int i = 0; i < getMapSize().x; i++)
+  {
+    for (int j = 0; j < getMapSize().y; j++)
+    {
+      // Grass
+      if (getMapGridCell(i, j).getCost() == 3) {
+        setCell(i, j, sf::Color().Green);
+      }
+      // Water
+      if (getMapGridCell(i, j).getCost() == 2) {
+        setCell(i, j, sf::Color().Blue);
+      }
+      // Marsh
+      if (getMapGridCell(i, j).getCost() == 5) {
+        setCell(i, j, sf::Color().White);
+      }
+      // Obstacle
+      if (getMapGridCell(i, j).getCost() == 10) {
+        setCell(i, j, sf::Color().Black);
+      }
+    }
   }
 }
 

@@ -33,6 +33,10 @@ class RTSApplication
     return m_framesPerSecond;
   }
 
+  int& getTerrainID() {
+    return s_terrain;
+  }
+
  protected:
 
  private:
@@ -64,7 +68,8 @@ class RTSApplication
    sf::RenderWindow* m_window;
    sf::Font* m_arialFont;
    RTSWorld m_gameWorld;
-
+   // Terrain type
+   int s_terrain;
    float m_fpsTimer;
    float m_fpsCounter;
    float m_framesPerSecond;

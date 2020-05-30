@@ -124,12 +124,65 @@ RTSApplication::gameLoop() {
     sf::Event event;
     while (m_window->pollEvent(event)) {
       ImGui::SFML::ProcessEvent(event);
-      
       if (event.type == sf::Event::Closed) {
         m_window->close();
       }
     }
 
+      if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
+      {
+        if (s_terrain == 4)
+        {
+          m_gameWorld.getTiledMap()->m_InitialPos = { m_gameWorld.getTiledMap()->m_selectedTileX,
+            m_gameWorld.getTiledMap()->m_selectedTileY };
+        }
+        if (s_terrain == 5)
+        {
+          m_gameWorld.getTiledMap()->m_FinalPos = { m_gameWorld.getTiledMap()->m_selectedTileX,
+            m_gameWorld.getTiledMap()->m_selectedTileY };
+        }
+
+        switch (m_gameWorld.getTiledMap()->m_terrainType)
+        {
+        case TERRAIN_TYPE::E::kGrass :
+          m_gameWorld.getTiledMap()->setCost(
+            m_gameWorld.getTiledMap()->m_selectedTileX,
+            m_gameWorld.getTiledMap()->m_selectedTileY,
+            3
+          );
+          break;
+        case TERRAIN_TYPE::E::kWater :
+          m_gameWorld.getTiledMap()->setCost(
+            m_gameWorld.getTiledMap()->m_selectedTileX,
+            m_gameWorld.getTiledMap()->m_selectedTileY,
+            2
+          );
+          break;
+        case TERRAIN_TYPE::E::kMarsh :
+          m_gameWorld.getTiledMap()->setCost(
+            m_gameWorld.getTiledMap()->m_selectedTileX,
+            m_gameWorld.getTiledMap()->m_selectedTileY,
+            5
+          );
+          break;
+        case TERRAIN_TYPE::E::kObstacle :
+          m_gameWorld.getTiledMap()->setCost(
+            m_gameWorld.getTiledMap()->m_selectedTileX,
+            m_gameWorld.getTiledMap()->m_selectedTileY,
+            10
+          );
+          break;
+
+        default:
+          break;
+        }
+
+        m_gameWorld.getTiledMap()->m_tiles.push_back(
+          Vector2{
+            m_gameWorld.getTiledMap()->m_selectedTileX,
+            m_gameWorld.getTiledMap()->m_selectedTileY
+          });
+      }
     g_time()._update();
     ge_frame_mark();
     updateFrame();
@@ -205,7 +258,7 @@ RTSApplication::updateFrame() {
   axisMovement *= GameOptions::s_MapMovementSpeed * deltaTime;
 
   m_gameWorld.getTiledMap()->moveCamera(axisMovement.x, axisMovement.y);
-
+  m_gameWorld.getTiledMap()->m_terrainType = (TERRAIN_TYPE::E)s_terrain;
   //Update the world
   m_gameWorld.update(deltaTime);
 }
@@ -316,4 +369,69 @@ mainMenu(RTSApplication* pApp) {
   }
   ImGui::End();
 
+  ImGui::Begin("Game Options");
+  {
+    const char* items[] = {  "Water", "Grass", "Marsh", "Obstacle" , "Inital Position", "Final Position", };
+    static const char* current_item = NULL;
+    ImGuiComboFlags flags = ImGuiComboFlags_NoArrowButton;
+
+    ImGuiStyle& style = ImGui::GetStyle();
+    float w = ImGui::CalcItemWidth();
+    float spacing = style.ItemInnerSpacing.x;
+    float button_sz = ImGui::GetFrameHeight();
+    ImGui::PushItemWidth(w - spacing * 2.0f - button_sz * 2.0f);
+    if (ImGui::BeginCombo("##custom combo", current_item))
+    {
+      for (int n = 0; n < IM_ARRAYSIZE(items); n++)
+      {
+        bool is_selected = (current_item == items[n]);
+        if (ImGui::Selectable(items[n], is_selected))
+        {
+          current_item = items[n];
+          pApp->getTerrainID() = n;
+        }
+        if (is_selected)
+        {
+          ImGui::SetItemDefaultFocus();
+          /*if (current_item == "Inital Position")
+          {
+            
+          }
+          if (current_item == "Final Position")
+          {
+
+          }
+          if (current_item == "Water")
+          {
+            pApp->getTerrainID() = 0;
+          }
+          if (current_item == "Grass")
+          {
+            pApp->getTerrainID() = 1;
+          }
+          if (current_item == "Marsh")
+          {
+            pApp->getTerrainID() = 2;
+          }
+          if (current_item == "Obstacle")
+          {
+            pApp->getTerrainID() = 3;
+          }*/
+        }
+      }
+      ImGui::EndCombo();
+    }
+    ImGui::PopItemWidth();
+    ImGui::SameLine(0, spacing);
+    if (ImGui::ArrowButton("##r", ImGuiDir_Left))
+    {
+    }
+    ImGui::SameLine(0, spacing);
+    if (ImGui::ArrowButton("##r", ImGuiDir_Right))
+    {
+    }
+    ImGui::SameLine(0, style.ItemInnerSpacing.x);
+    ImGui::Text("Custom Combo");
+  }
+  ImGui::End();
 }

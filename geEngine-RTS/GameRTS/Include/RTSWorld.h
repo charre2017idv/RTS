@@ -5,6 +5,8 @@
 #include <RTSPathfinding.h>
 #include <DFS.h>
 #include <SFML/Graphics.hpp>
+#include <BFS.h>
+#include <BestFirstSearch.h>
 
 using namespace geEngineSDK;
 
@@ -57,4 +59,7 @@ class RTSWorld
   //RTSPathfinding path;
 
   DFS m_dfs;
+  BFS m_bfs;
+  BestFirstSearch m_bestFS;
+  int state = 2;
 };

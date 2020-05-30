@@ -3,12 +3,13 @@
 
 class RTSTiledMap;
 
-class BFS : public RTSPathfinding
+class BestFirstSearch : public RTSPathfinding
 {
 public:
-	BFS();
-	~BFS();
+	BestFirstSearch();
+	~BestFirstSearch();
 
+private:
 public:
 	void
   init(RTSTiledMap* _pTiledMap);
@@ -34,11 +35,13 @@ private:
 	void
 	CheckLeft();
 
-	void 
+	void
 	checkThisCell(Vector2I _thisCell);
 
 	bool
 	CheckIfCellIsntVisited(Vector2I _thisCell);
-
+public:
+	vector <RTSTiledMap*> OpenTiles;
+	vector <RTSTiledMap*> CloseTiles;
 };
 

@@ -164,6 +164,9 @@ class RTSTiledMap
   void 
   setCell(const int32 x, const int32 y, sf::Color _color);
 
+  void 
+  colorCell(const int32 x, const int32 y);
+
   FrameVector<sf::Vertex>
   getCell();
 
@@ -173,6 +176,8 @@ class RTSTiledMap
     GE_ASSERT((x >= 0) && (x < m_mapSize.x) && (y >= 0) && (y < m_mapSize.y));
     return m_mapGrid[(y * m_mapSize.x) + x];
   };
+
+  sf::Vector2f getMouseOnRenderTarget();
 
  private:
   Vector2I m_mapSize;
@@ -190,4 +195,24 @@ class RTSTiledMap
   Vector2I m_PreCalc_ScreenDeface;
 
   sf::RenderTarget* m_pTarget;
+  public:
+  float m_timeToNext = 0.0f;
+  RTSTiledMap* m_parent;
+  Vector2I m_position;
+  Vector2 m_InitialPos;
+  Vector2 m_FinalPos;
+
+  float m_selectedTileX;
+  float m_selectedTileY;
+  float m_selectedTileByIndex;
+
+  Vector2 mousePosition;
+
+  vector<Vector2> m_tiles;
+  vector<Vector2> m_water;
+  vector<Vector2> m_grass;
+  vector<Vector2> m_marsh;
+  vector<Vector2> m_obstacle;
+  TERRAIN_TYPE::E m_terrainType;
+
 };

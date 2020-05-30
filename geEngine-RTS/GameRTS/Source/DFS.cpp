@@ -63,17 +63,13 @@ void DFS::render()
 	RTSPathfinding::render();
 	//	m_pTiledMap->setCell(m_lastPos.x, m_lastPos.y+1, sf::Color().Yellow);
 	
-	if (m_hasFinish)
-	{
-		for (size_t i = 0; i < OpenList.size(); i++)
-		{
+	if (m_hasFinish) {
+		for (size_t i = 0; i < OpenList.size(); i++) {
 			m_pTiledMap->setCell(OpenList[i].x, OpenList[i].y, sf::Color().Magenta);
 		}
 	}
-	else
-	{
-		for (size_t i = 0; i < OpenList.size(); i++)
-		{
+	else {
+		for (size_t i = 0; i < OpenList.size(); i++) {
 			m_pTiledMap->setCell(OpenList[i].x, OpenList[i].y, sf::Color().Yellow);
 		}
 	}
