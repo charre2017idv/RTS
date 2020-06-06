@@ -41,7 +41,7 @@ RTSWorld::init(sf::RenderTarget* pTarget) {
   RTSGame::RTSUnitType unitTypes;
   unitTypes.loadAnimationData(m_pTarget, 1);
 
- 
+  m_controller.loadAssetsFromJson();
   return true;
 }
 

@@ -34,6 +34,10 @@ private:
 	/**
 	 * @brief
 	 */
-	Vector2I 
+	Vector2I m_IPos;
+	/**
+	 * @brief 
+	 */
+	Vector2I m_FPos;
 };
 

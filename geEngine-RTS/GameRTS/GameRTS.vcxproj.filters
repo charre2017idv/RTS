@@ -65,6 +65,12 @@
     <ClCompile Include="Source\BestFirstSearch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Pathfinder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RTSController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\RTSUnitType.h">
@@ -118,5 +124,7 @@
     <ClInclude Include="Include\BFS.h" />
     <ClInclude Include="Include\Dijkstra.h" />
     <ClInclude Include="Include\BestFirstSearch.h" />
+    <ClInclude Include="Source\Pathfinder.h" />
+    <ClInclude Include="Include\RTSController.h" />
   </ItemGroup>
 </Project>

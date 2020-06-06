@@ -8,6 +8,8 @@
 #include <BFS.h>
 #include <BestFirstSearch.h>
 
+#include <RTSController.h>
+
 using namespace geEngineSDK;
 
 class RTSTiledMap;
@@ -55,6 +57,8 @@ class RTSWorld
   int8 m_activeWalkerIndex;
 
   sf::RenderTarget* m_pTarget;
+
+  RTSController m_controller;
 
   //RTSPathfinding path;
 
