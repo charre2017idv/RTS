@@ -42,6 +42,8 @@ RTSWorld::init(sf::RenderTarget* pTarget) {
   unitTypes.loadAnimationData(m_pTarget, 1);
 
   m_controller.loadAssetsFromJson();
+
+  //.init(m_pTiledMap);
   return true;
 }
 
@@ -58,97 +60,18 @@ RTSWorld::destroy() {
     ge_delete(m_pTiledMap);
     m_pTiledMap = nullptr;
   }
-  //m_dfs.destroy();
-  //switch (state)
-  //{
-  //case 0:
-  //  m_dfs.destroy();
-  //  break;
-  //case 1:
-  //  m_bfs.destroy();
-  //  break;
-  //case 2:
-  //  m_bestFS.destroy();
-  //  break;
-  //default:
-  //  break;
-  //}
 }
 
 void
 RTSWorld::update(float deltaTime) {
   m_pTiledMap->update(deltaTime);
-  //switch (state)
-  //{
-  //case 0:
-  //  if (m_pTiledMap->m_InitialPos != Vector2I(0, 0) && m_pTiledMap->m_FinalPos != Vector2I(0, 0))
-  //  {
-  //    m_dfs.m_IPos = m_pTiledMap->m_InitialPos;
-  //    m_dfs.m_FPos = m_pTiledMap->m_FinalPos;
-  //    m_dfs.init(m_pTiledMap);
-  //  }
-  //  break;
-  //case 1:
-  //  if (m_pTiledMap->m_InitialPos != Vector2I(0, 0) && m_pTiledMap->m_FinalPos != Vector2I(0, 0))
-  //  {
-  //    m_bfs.m_IPos = m_pTiledMap->m_InitialPos;
-  //    m_bfs.m_FPos = m_pTiledMap->m_FinalPos;
-  //    m_bfs.init(m_pTiledMap);
-  //  }
-  //  break;
-  //case 2:
-  //  if (m_pTiledMap->m_InitialPos != Vector2I(0, 0) && m_pTiledMap->m_FinalPos != Vector2I(0, 0))
-  //  {
-  //    m_bestFS.m_IPos = m_pTiledMap->m_InitialPos;
-  //    m_bestFS.m_FPos = m_pTiledMap->m_FinalPos;
-  //    m_bestFS.init(m_pTiledMap);
-  //  }
-  //  break;
-  /*if (m_pTiledMap->m_InitialPos != Vector2I(0, 0) && m_pTiledMap->m_FinalPos != Vector2I(0, 0))
-  {
-    m_dfs.m_IPos = m_pTiledMap->m_InitialPos;
-    m_dfs.m_FPos = m_pTiledMap->m_FinalPos;
-    m_dfs.init(m_pTiledMap);
-  }
-  m_dfs.update(deltaTime);*/
-  //default:
-  //  break;
-  //}
-  //
-  //switch (state)
-  //{
-  //case 0:
-  //  m_dfs.update(deltaTime);
-  //  break;
-  //case 1:
-  //  m_bfs.update(deltaTime);
-  //  break;
-  //case 2:
-  //  m_bestFS.update(deltaTime);
-  //  break;
-  //default:
-  //  break;
-  //}
+
+  m_controller.update();
 }
 
 void
 RTSWorld::render() {
   m_pTiledMap->render(); 
-  //m_dfs.render();
-  //switch (state)
-  //{
-  //case 0:
-  //  m_dfs.render();
-  //  break;
-  //case 1:
-  //  m_bfs.render();
-  //  break;
-  //case 2:
-  //  m_bestFS.render();
-  //  break;
-  //default:
-  //  break;
-  //}
   
 }
 
