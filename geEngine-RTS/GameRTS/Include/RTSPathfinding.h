@@ -52,8 +52,6 @@ public:
 
 	bool
   CheckIfIsEqualToLastNode();
-
-	void DepthFirstSearch(int i);
 public:
 	int m_gridSize;
 	Vector2I m_IPos;
@@ -66,10 +64,4 @@ public:
 	vector<Vector2I> CloseList;
 	bool m_hasFinish = false;
 	Dir m_direction;
-
-	// DFS
-	int m_numVertex;
-	List<int>* adj;
-	bool* visited;
-
 };

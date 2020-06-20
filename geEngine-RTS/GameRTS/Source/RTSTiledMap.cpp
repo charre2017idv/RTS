@@ -32,11 +32,10 @@ RTSTiledMap::init(sf::RenderTarget* pTarget, const Vector2I& mapSize) {
 
   m_mapGrid.resize(mapSize.x * mapSize.y);
   m_mapSize = mapSize;
-  m_VisitiedTiles.resize(mapSize.x * mapSize.y);
-  m_pathfinder.init(mapSize.x * mapSize.y);
   setCameraStartPosition(0, 0);
 
   m_mapTextures.resize(TERRAIN_TYPE::kNumObjects);
+
   String textureName;
   for (uint32 i = 0; i < TERRAIN_TYPE::kNumObjects; ++i) {
 #ifdef MAP_IS_ISOMETRIC
@@ -51,16 +50,23 @@ RTSTiledMap::init(sf::RenderTarget* pTarget, const Vector2I& mapSize) {
 
   for (int i = 0; i < getMapSize().x; i++)
   {
-    setVisit(i, 0, false);
+    setCost(i, 0, 1);
     for (int j = 0; j < getMapSize().y; j++)
     {
-      setVisit(i, 0, false);
-      setPosition(i, j, Vector2I(i, j));
+      setCost(0, j, 1);
     }
   }
 
-  m_pathfinder.m_currentTile = m_currentTileV2;
-  m_pathfinder.m_path.push_front(m_currentTileV2);
+
+  //setCost(2, 2, 1);
+  //setCost(2, 3, 1);
+  //setCost(1, 5, 1);
+  //setCost(3, 4, 1);
+  //setCost(3, 5, 1);
+  //setCost(4, 1, 1);
+  //setCost(4, 4, 1);
+  //setCost(6, 2, 1);
+  //setCost(6, 5, 1);
 
   m_terrainType = TERRAIN_TYPE::E::kWater;
   return true;
@@ -86,30 +92,6 @@ void
 RTSTiledMap::setCost(const int32 x, const int32 y, const int8 cost) {
   GE_ASSERT((x >= 0) && (x < m_mapSize.x) && (y >= 0) && (y < m_mapSize.y));
   m_mapGrid[(y*m_mapSize.x) + x].setCost(cost);
-}
-
-void RTSTiledMap::setVisit(const int32 x, const int32 y, const bool _isVisit)
-{
-  GE_ASSERT((x >= 0) && (x < m_mapSize.x) && (y >= 0) && (y < m_mapSize.y));
-  m_mapGrid[(y * m_mapSize.x) + x].setVisit(_isVisit);
-}
-
-bool RTSTiledMap::getVisit(const int32 x, const int32 y) 
-{
-  GE_ASSERT((x >= 0) && (x < m_mapSize.x) && (y >= 0) && (y < m_mapSize.y));
-  return m_mapGrid[(y * m_mapSize.x) + x].getVisit();
-}
-
-void RTSTiledMap::setPosition(const int32 x, const int32 y,  Vector2I Pos)
-{
-  GE_ASSERT((x >= 0) && (x < m_mapSize.x) && (y >= 0) && (y < m_mapSize.y));
-  m_mapGrid[(y * m_mapSize.x) + x].setPosition(Pos);
-}
-
-Vector2I RTSTiledMap::getPosition(const int32 x, const int32 y) 
-{
-  GE_ASSERT((x >= 0) && (x < m_mapSize.x) && (y >= 0) && (y < m_mapSize.y));
-  return m_mapGrid[(y * m_mapSize.x) + x].getPosition();
 }
 
 int8
@@ -192,7 +174,7 @@ RTSTiledMap::getMapToScreenCoords(const int32 mapX,
 #endif
 }
 
-void RTSTiledMap::setCell(int32& x, int32& y, sf::Color _color)
+void RTSTiledMap::setCell(const int32 x, const int32 y, sf::Color _color)
 {
   int32 tmpX = 0;
   int32 tmpY = 0;
@@ -337,153 +319,12 @@ sf::Vector2f RTSTiledMap::getMouseOnRenderTarget()
   return mouseInTargetSpace;
 }
 
-void RTSTiledMap::depthFirstSearch()
-{
-  // Check if the stack is empty
-  if (m_path.empty()) {
-    m_isSearching = false;
-    return;
-  }
-  // Check if the current tile is the final position
-  if (checkIfIsFinalPos(m_currentTileV2)) {
-    return;
-  }
-
-  // Mark the current tile as checked
-  setCell(m_currentTileV2.x, m_currentTileV2.y, sf::Color::Magenta);
-  // Store the current tile with the last value of the stack
-  m_currentTileV2 = m_path.back();       
-  // Mark the new current tile 
-  setCell(m_currentTileV2.x, m_currentTileV2.y, sf::Color::Cyan);
-  // Store the current tile to be draw
-  m_visitedPos.push_back(m_currentTileV2);
-  // Drop the last value of the stack
-  m_path.pop_back();                         
-
-  // Get the current value to be checkt in the 8 directions of the tile
-  int currentx = m_currentTileV2.x;
-  int currenty = m_currentTileV2.y;
-  // And mark that cell as visited
-  m_VisitiedTiles[(currenty * m_mapSize.x) + currentx] = true;
-  // Make a search on every direction with the current tile
-  searchOnGrid(currentx, currenty);
-}
-
-void RTSTiledMap::breathFirstSearch()
-{
-  // Check if the stack is empty
-  if (m_path.empty()) {
-    m_isSearching = false;
-    return;
-  }
-  // Check if the current tile is the final position
-  if (checkIfIsFinalPos(m_currentTileV2)) {
-    return;
-  }
-  // Mark the current tile as checked
-  setCell(m_currentTileV2.x, m_currentTileV2.y, sf::Color::Magenta);
-  // Store the current tile with the last value of the stack
-  m_currentTileV2 = m_path.front();
-  // Mark the new current tile 
-  setCell(m_currentTileV2.x, m_currentTileV2.y, sf::Color::Cyan);
-  // Get the current value to be checkt in the 8 directions of the tile
-  int currentx = m_currentTileV2.x;
-  int currenty = m_currentTileV2.y;
-  // Check all the visited front tiles
-  while (m_VisitiedTiles[(currenty * m_mapSize.x) + currentx]) {
-    m_path.pop_front();
-    m_currentTileV2 = m_path.front();
-    currentx = m_currentTileV2.x;
-    currenty = m_currentTileV2.y;
-  }
-  // Mark the current tile as visited
-  m_VisitiedTiles[(currenty * m_mapSize.x) + currentx] = true;
-  // Store the current tile to be draw
-  m_visitedPos.push_back(m_currentTileV2);
-  // Drop the first value of the stack
-  m_path.pop_front();
-  // Make a search on every direction with the current tile
-  searchOnGrid(currentx, currenty);
-}
-
-void RTSTiledMap::BestFirstSearch()
-{
-  // Check if the stack is empty
-  if (m_path.empty()) {
-    m_isSearching = false;
-    return;
-  }
-  // Check if the current tile is the final position
-  if (checkIfIsFinalPos(m_currentTileV2)) {
-    return;
-  }
-  // Mark the current tile as checked
-  setCell(m_currentTileV2.x, m_currentTileV2.y, sf::Color::Magenta);
-  // Store the current tile with the last value of the stack
-  m_currentTileV2 = m_path.front();
-  // Mark the new current tile 
-  setCell(m_currentTileV2.x, m_currentTileV2.y, sf::Color::Cyan);
-  // Get the current value to be checkt in the 8 directions of the tile
-  int currentx = m_currentTileV2.x;
-  int currenty = m_currentTileV2.y;
-  // Store the current tile to be draw
-  m_visitedPos.push_back(m_currentTileV2);
-  // Drop the first value of the stack
-  m_path.pop_front();
-  // Mark the current tile as visited
-  m_VisitiedTiles[(currenty * m_mapSize.x) + currentx] = true;
-  // Make a search on every direction with the current tile
-  searchOnGrid(currentx, currenty);
-}
-
-
-
-void RTSTiledMap::searchOnGrid(int32 _x, int32 _y)
-{
-  for (int i = 7; i > -1; --i) {
-
-    int x = _x + m_directionX[i];
-    int y = _y + m_directionY[i];
-
-    if (x >= 0 && x < m_mapSize.x && y >= 0 && y < m_mapSize.y) {
-      if (!m_VisitiedTiles[(y * m_mapSize.x) + x] &&
-        m_mapGrid[(_y * m_mapSize.x) + _x].getCost() != 1) {
-
-        setCell(x, y, sf::Color::Red);
-        m_path.push_back(Vector2I(x, y));
-      }
-    }
-  }
-}
-
-bool RTSTiledMap::checkIfIsFinalPos(Vector2I& pos)
-{
-  if (pos == m_FinalPos) {
-    return true;
-  }
-  return false;
-}
-
-void RTSTiledMap::clearPathfindingSearch()
-{
-  m_isSearching = false;
-  m_VisitiedTiles.clear();
-  m_VisitiedTiles.resize(m_mapSize.x * m_mapSize.y);
-  m_visitedPos.clear();
-  m_path.clear();
-  m_currentTileV2 = Vector2I::ZERO;
-  m_InitialPos = Vector2I::ZERO;
-  m_FinalPos = Vector2I::ZERO;
-}
 
 void
 RTSTiledMap::update(float deltaTime) {
   GE_UNREFERENCED_PARAMETER(deltaTime);
   m_timeToNext += deltaTime;
   //m_dfs.update(deltaTime);
- // MapTile EndTile = m_mapGrid[2 * m_mapSize.x, 2];
- // EndTile.setPosition(Vector2I(2, 2));
-  
 }
 
 void
@@ -529,9 +370,8 @@ RTSTiledMap::render() {
         m_selectedTileX = iterX;
         m_selectedTileY = iterY;
         m_selectedTileByIndex = (iterY * m_mapSize.x) + iterX;
-        tileposX = iterX;
-        tileposY = iterY;
       }
+
       tmpTypeTile = m_mapGrid[(iterY*m_mapSize.x) + iterX].getType();
       RTSTexture& refTexture = m_mapTextures[tmpTypeTile];
       clipRect.x = (iterX << GameOptions::BITSHFT_TILESIZE.x) % refTexture.getWidth();
@@ -617,7 +457,6 @@ RTSTiledMap::render() {
   }
   else
   {
-    
     setCell(m_InitialPos.x, m_InitialPos.y, sf::Color().Green);
   }
 
@@ -627,14 +466,11 @@ RTSTiledMap::render() {
   }
   else
   {
-    /*m_visited.clear();
-    m_neighbors.clear();
-    isSearching = true;*/
     setCell(m_FinalPos.x, m_FinalPos.y, sf::Color().Red);
   }
 
 
-  // Draw the Tiles of the grid
+  // Draw the Tiles of the greed
   for (int i = 0; i < getMapSize().x; i++)
   {
     for (int j = 0; j < getMapSize().y; j++)
@@ -655,35 +491,10 @@ RTSTiledMap::render() {
       if (getMapGridCell(i, j).getCost() == 1) {
         setCell(i, j, sf::Color().Black);
       }
-      if (getVisit(i,j)) {
-        setCell(i, j, sf::Color().Magenta);
-      }
     }
   }
 
-  for (int i = 0; i < m_visitedPos.size(); i++)
-  {
-    setCell(m_visitedPos[i].x, m_visitedPos[i].y, sf::Color::Cyan);
-  }
-  //setCost(4, 4, 1);
-  m_pathfinder.m_isSearching = m_isSearching;
-  if (m_isSearching) {
-    switch (m_Pathfinding_state)
-    {
-    case 0:
-      depthFirstSearch();
-      break;
-    case 1:
-      breathFirstSearch();
-      break;
-    case 2:
-      BestFirstSearch();
-      break;
-    default:
-      break;
-    }
-
-  }
+  //m_dfs.render();
 }
 
 RTSTiledMap::MapTile::MapTile() {

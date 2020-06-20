@@ -1,12 +1,12 @@
 #pragma once
 
 #include <gePlatformUtility.h>
-#include "RTSConfig.h"
 #include <geVector2.h>
 #include <geVector2I.h>
-#include "Pathfinder.h"
+
 #include <SFML/Graphics.hpp>
 #include "DFS.h"
+#include "RTSConfig.h"
 
 using namespace geEngineSDK;
 
@@ -54,42 +54,9 @@ class RTSTiledMap
       m_cost = cost;
     }
 
-    void 
-    setVisit(const bool _visit) {
-      m_isVisited = _visit;
-    }
-
-    FORCEINLINE bool
-    getVisit() {
-      return m_isVisited;
-    }
-
-    void setPosition(Vector2I& pos) {
-      m_position = pos;
-    }
-
-    Vector2I 
-    getPosition() {
-      return m_position;
-    }
-
-    /*void
-    setParent(MapTile* parent) {
-      m_parent = parent;
-    };
-
-    MapTile* 
-    getParent() {
-      return m_parent;
-    }*/
-
-   
    private:
-     Vector2I m_position;
     uint8 m_idType;
     int8 m_cost;
-    bool m_isVisited = false;
-    //MapTile* m_parent;
   };
 
  public:
@@ -126,18 +93,6 @@ class RTSTiledMap
 
   void
   setCost(const int32 x, const int32 y, const int8 cost);
-  
-  void
-  setVisit(const int32 x, const int32 y, const bool _isVisit);
-
-  bool 
-  getVisit(const int32 x, const int32 y);
-
-  void 
-  setPosition(const int32 x, const int32 y, Vector2I Pos);
-  
-  Vector2I
-  getPosition(const int32 x, const int32 y);
 
   int8
   getType(const int32 x, const int32 y) const;
@@ -207,7 +162,7 @@ class RTSTiledMap
                        int32 &scrY);
 
   void 
-  setCell(int32& x, int32& y, sf::Color _color);
+  setCell(const int32 x, const int32 y, sf::Color _color);
 
   void 
   colorCell(const int32 x, const int32 y);
@@ -222,47 +177,9 @@ class RTSTiledMap
     return m_mapGrid[(y * m_mapSize.x) + x];
   };
 
-  bool isOutOfLimits(int x, int y)
-  {
-    return (x >= 0) && (x < m_mapSize.x) && (y >= 0) && (y < m_mapSize.y);
-  }
-
   sf::Vector2f getMouseOnRenderTarget();
-  /** 
-   * @brief 
-   * @param 
-   * @return 
-   * @bug 
-   */
-  void
-  depthFirstSearch();
 
-  void
-  breathFirstSearch();
-  
-  void 
-  BestFirstSearch();
-
-  bool isSearching() {
-    return m_isSearching;
-  }
-
-  void
-  setNeighbors(Vector2I& pos);
-
-  void
-  searchOnGrid(int32 _x, int32 _y);
-
-
-  bool 
-  checkIfIsFinalPos(Vector2I& pos);
-
-  void 
-  clearPathfindingSearch();
-  //
- private:                                             
-                                                       
-  //int currentx, currenty;
+ private:
   Vector2I m_mapSize;
   Vector<MapTile> m_mapGrid;
   Vector<RTSTexture> m_mapTextures;
@@ -288,22 +205,11 @@ class RTSTiledMap
   int m_selectedTileX;
   int m_selectedTileY;
   float m_selectedTileByIndex;
-  float tileposX;
-  float tileposY;
+
   Vector2 mousePosition;
 
   vector<Vector2I> m_tiles;
   TERRAIN_TYPE::E m_terrainType;
-  // Pathfanding data
-  int m_Pathfinding_state = 0;
-  bool m_isSearching = false;
-  Vector<bool> m_VisitiedTiles;
-  Pathfinder m_pathfinder;
-  Vector<Vector2I> m_visitedPos;
-  public:
-  deque<Vector2I> m_path;
-  Vector2I m_currentTileV2;
-   // Coordinates
-  int m_directionX[8] = { 1, 1, 0,-1,-1,-1,  0,  1 };  
-  int m_directionY[8] = { 0,-1,-1,-1, 0, 1,  1,  1 };  
+
+  DFS m_dfs;
 };

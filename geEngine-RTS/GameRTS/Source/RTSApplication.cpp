@@ -135,8 +135,6 @@ RTSApplication::gameLoop() {
         {
           m_gameWorld.getTiledMap()->m_InitialPos = { m_gameWorld.getTiledMap()->m_selectedTileX,
             m_gameWorld.getTiledMap()->m_selectedTileY };
-          m_gameWorld.getTiledMap()->m_currentTileV2 = m_gameWorld.getTiledMap()->m_InitialPos;
-          m_gameWorld.getTiledMap()->m_path.push_front(m_gameWorld.getTiledMap()->m_currentTileV2);
         }
         if (s_terrain == 5)
         {
@@ -418,82 +416,11 @@ mainMenu(RTSApplication* pApp) {
     ImGui::Text("Custom Combo");
   }
   ImGui::End();
-
-  /**
-  * @brief Change pathfinding mode
-  */
-  ImGui::Begin("Game Options");
-  {
-    const char* items[] = { "DepthFirstSearch", "BreathFirstSearch", "BestFirstSearch" };
-    static const char* current_item = NULL;
-    ImGuiComboFlags flags = ImGuiComboFlags_NoArrowButton;
-
-    ImGuiStyle& style = ImGui::GetStyle();
-    float w = ImGui::CalcItemWidth();
-    float spacing = style.ItemInnerSpacing.x;
-    float button_sz = ImGui::GetFrameHeight();
-    ImGui::PushItemWidth(w - spacing * 2.0f - button_sz * 2.0f);
-    if (ImGui::BeginCombo("##Pathfinding Mode", current_item))
-    {
-      for (int n = 0; n < IM_ARRAYSIZE(items); n++)
-      {
-        bool is_selected = (current_item == items[n]);
-        if (ImGui::Selectable(items[n], is_selected))
-        {
-          current_item = items[n];
-          pApp->getPathfinderID() = n;
-          pApp->getWorld()->getTiledMap()->m_Pathfinding_state = n;
-        }
-        if (is_selected)
-        {
-          ImGui::SetItemDefaultFocus();
-        }
-      }
-      ImGui::EndCombo();
-    }
-    ImGui::PopItemWidth();
-    ImGui::SameLine(0, spacing);
-    if (ImGui::ArrowButton("##r", ImGuiDir_Left))
-    {
-    }
-    ImGui::SameLine(0, spacing);
-    if (ImGui::ArrowButton("##r", ImGuiDir_Right))
-    {
-    }
-    ImGui::SameLine(0, style.ItemInnerSpacing.x);
-    ImGui::Text("Custom Combo");
-  }
-  ImGui::End();
-
   ImGui::Begin("Game Options");
   {
     if (ImGui::Button("Reset Positions")) {
       pApp->getResetPosition() = true;
     }
-    if (ImGui::Button("Start Search")) {
-      pApp->getWorld()->getTiledMap()->m_isSearching = true;
-    }
   }
   ImGui::End();
-
-  ImGui::Begin("Game Options");
-  {
-    if (ImGui::Button("Reset Pathfinding")) {
-      pApp->getWorld()->getTiledMap()->clearPathfindingSearch();
-    }
-  }
-  ImGui::End();
-
-  ImGui::Begin("Game Options");
-  {
-    if (pApp->getWorld()->getTiledMap()->mousePosition.x != -1 || pApp->getWorld()->getTiledMap()->mousePosition.y != -1)
-    {
-
-      ImGui::Text("Mouse x: %f", pApp->getWorld()->getTiledMap()->tileposX);
-      ImGui::Text("Mouse y: %f", pApp->getWorld()->getTiledMap()->tileposY);
-      ImGui::Text("Selected tile by index: %f", pApp->getWorld()->getTiledMap()->m_selectedTileByIndex);
-    }
-  }
-  ImGui::End();
-
 }

@@ -9,7 +9,6 @@
 #include <BestFirstSearch.h>
 
 #include <RTSController.h>
-#include "Pathfinder.h"
 
 using namespace geEngineSDK;
 
@@ -62,7 +61,7 @@ class RTSWorld
   RTSController m_controller;
 
   //RTSPathfinding path;
-  Pathfinder m_pathfinder;
+
   //DFS m_dfs;
   //BFS m_bfs;
   //BestFirstSearch m_bestFS;
