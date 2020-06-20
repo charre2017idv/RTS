@@ -9,21 +9,20 @@
 #pragma once
 #include "gePlatformUtility.h"
 #include "RTSConfig.h"
+#include "Externals/json.hpp"
+#include <SFML/Graphics.hpp>
 #include <geVector4.h>
 #include <geVector2.h>
-struct UnitInfo
-{
-	string imagePNGPath;
-	UnitActions action;
-	Vector4 frame;
-	bool rotated;
-	bool trimed;
-	Vector4 spriteSourceSize;
-	Vector2 sourceSize;
-};
+#include "RTSTexture.h"
+using json = nlohmann::json;
 
 enum UnitActions
 {
+	NORTH,
+	NORTH_WEST,
+	SOUTH,
+	SOUTH_WEST,
+	WEST,
 	// IDLE
 	IDLE_NORTH,
 	IDLE_NORTH_WEST,
@@ -47,53 +46,75 @@ enum UnitActions
 enum UnitType
 {
 	ARCHER,
-	CASTILIAN_KNIGHT
+	CASTILIAN_KNIGHT,
+	CROSSBOW,
+	ENGLISH_KNIGHT,
+	FRENCH_KNIGHT,
+	HAND_GUNNER,
+	HEAVY_CAVALRY
 };
+
+enum SpriteData
+{
+	Unit_Type = 0,
+	UnitAction = 1,
+	UnitPath = 2
+};
+
+struct AnimationData 
+{
+	vector<string> spriteData;
+	string name;
+	//UnitActions action;
+	Vector4 frame;
+	bool rotated;
+	bool trimed;
+	Vector4 spriteSourceSize;
+	Vector2 sourceSize;
+};
+
 
 class RTSUnit
 {
 public:
 	RTSUnit();
 	~RTSUnit();
-
+	/**
+	 * @brief 
+	 */
+	void 
+	createUnit(const char* _path);
+	/**
+	 * @brief 
+	 */
+	vector<AnimationData>
+	getUnitRawData(string _unitName, String _textureMapPath);
+	/**
+	 * @brief 
+	 */
+	void 
+	clearUnitRawData();
 public:
+	string imagePNGPath;
  /**
   * @brief Unit type ID 
   */
  UnitType m_unitType;
  /**
+ * @brief 
+ */
+ string m_name;
+ /**
+ * @brief 
+ */
+ json m_jsonFile;
+ std::string m_Data;
+ vector<AnimationData> Units;
+ /**
   * @brief Idle containers
   */
- UnitInfo m_action_IdleNorth;
- UnitInfo m_action_IdleNorthWest;
- UnitInfo m_action_IdleSouth;
- UnitInfo m_action_IdleSouthWest;
- UnitInfo m_action_IdleWest;
- /**
-  * @brief Attack Containers
-  */
- UnitInfo m_action_AttackNorth;
- UnitInfo m_action_AttackNorthWest;
- UnitInfo m_action_AttackSouth;
- UnitInfo m_action_AttackSouthWest;
- UnitInfo m_action_AttackWest;
-
- /**
-  * @brief Run Containers
-  */
- vector<UnitInfo> m_action_RunNorth;
- vector<UnitInfo> m_action_RunNorthWest;
- vector<UnitInfo> m_action_RunSouth;
- vector<UnitInfo> m_action_RunSouthWest;
- vector<UnitInfo> m_action_RunWest;
-
- /**
-	* @brief Die Containers
-	*/
- vector<UnitInfo> m_action_DieNorth;
- vector<UnitInfo> m_action_DieNorthWest;
- vector<UnitInfo> m_action_DieSouth;
- vector<UnitInfo> m_action_DieSouthWest;
- vector<UnitInfo> m_action_DieWest;
+ vector<AnimationData> m_unitRawData;
+ sf::RenderTarget* m_pTarget;
+ RTSTexture m_textMap;
 };
 

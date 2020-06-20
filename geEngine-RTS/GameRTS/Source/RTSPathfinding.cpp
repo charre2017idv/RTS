@@ -20,13 +20,20 @@ void RTSPathfinding::init(RTSTiledMap * _pTiledMap)
   m_nextPos = { 0,0 };
 
   
-  
   m_gridSize = m_pTiledMap->getMapSize().x + m_pTiledMap->getMapSize().y;
+  // DFS Initialization
+  m_numVertex = m_gridSize;
+  adj = new List<int>[m_numVertex];
+  visited = new bool[m_numVertex];
+  for (int i = 0; i < m_numVertex; i++) {
+    visited[i] = false;
+  }
 }
 
 void RTSPathfinding::update(float deltaTime)
 {
   GE_UNREFERENCED_PARAMETER(deltaTime);
+  DepthFirstSearch(25);
 }
 
 void RTSPathfinding::render()
@@ -83,6 +90,18 @@ bool RTSPathfinding::CheckIfIsEqualToLastNode()
   else
   {
     return false;
+  }
+}
+
+void RTSPathfinding::DepthFirstSearch(int i)
+{
+  visited[i] = true;
+
+  List<int>::iterator it;
+  for (it = adj[i].begin(); it != adj[i].end(); ++it) {
+    if (!visited[*it]) {
+      DepthFirstSearch(*it);
+    }
   }
 }
 

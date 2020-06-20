@@ -36,6 +36,10 @@ class RTSApplication
   int& getTerrainID() {
     return s_terrain;
   }
+  
+  int& getPathfinderID() {
+    return m_pathfinderMode;
+  }
 
   bool& getResetPosition()
   {
@@ -75,6 +79,7 @@ class RTSApplication
    RTSWorld m_gameWorld;
    bool m_resetPos = false;
    // Terrain type
+   int m_pathfinderMode;
    int s_terrain;
    float m_fpsTimer;
    float m_fpsCounter;
