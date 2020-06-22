@@ -33,6 +33,19 @@ class RTSApplication
     return m_framesPerSecond;
   }
 
+  int& getTerrainID() {
+    return s_terrain;
+  }
+  
+  int& getPathfinderID() {
+    return m_pathfinderMode;
+  }
+
+  bool& getResetPosition()
+  {
+    return m_resetPos;
+  }
+
  protected:
 
  private:
@@ -64,7 +77,10 @@ class RTSApplication
    sf::RenderWindow* m_window;
    sf::Font* m_arialFont;
    RTSWorld m_gameWorld;
-
+   bool m_resetPos = false;
+   // Terrain type
+   int m_pathfinderMode;
+   int s_terrain;
    float m_fpsTimer;
    float m_fpsCounter;
    float m_framesPerSecond;

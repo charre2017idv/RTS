@@ -124,12 +124,67 @@ RTSApplication::gameLoop() {
     sf::Event event;
     while (m_window->pollEvent(event)) {
       ImGui::SFML::ProcessEvent(event);
-      
       if (event.type == sf::Event::Closed) {
         m_window->close();
       }
     }
 
+      if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
+      {
+        if (s_terrain == 4)
+        {
+          m_gameWorld.getTiledMap()->m_InitialPos = { m_gameWorld.getTiledMap()->m_selectedTileX,
+            m_gameWorld.getTiledMap()->m_selectedTileY };
+          m_gameWorld.getTiledMap()->m_currentTileV2 = m_gameWorld.getTiledMap()->m_InitialPos;
+          m_gameWorld.getTiledMap()->m_path.push_front(m_gameWorld.getTiledMap()->m_currentTileV2);
+        }
+        if (s_terrain == 5)
+        {
+          m_gameWorld.getTiledMap()->m_FinalPos = { m_gameWorld.getTiledMap()->m_selectedTileX,
+            m_gameWorld.getTiledMap()->m_selectedTileY };
+        }
+
+        switch (s_terrain)
+        {
+        case TERRAIN_TYPE::E::kGrass :
+          m_gameWorld.getTiledMap()->setCost(
+            m_gameWorld.getTiledMap()->m_selectedTileX,
+            m_gameWorld.getTiledMap()->m_selectedTileY,
+            3
+          );
+          break;
+        case TERRAIN_TYPE::E::kWater :
+          m_gameWorld.getTiledMap()->setCost(
+            m_gameWorld.getTiledMap()->m_selectedTileX,
+            m_gameWorld.getTiledMap()->m_selectedTileY,
+            2
+          );
+          break;
+        case TERRAIN_TYPE::E::kMarsh :
+          m_gameWorld.getTiledMap()->setCost(
+            m_gameWorld.getTiledMap()->m_selectedTileX,
+            m_gameWorld.getTiledMap()->m_selectedTileY,
+            5
+          );
+          break;
+        case TERRAIN_TYPE::E::kObstacle :
+          m_gameWorld.getTiledMap()->setCost(
+            m_gameWorld.getTiledMap()->m_selectedTileX,
+            m_gameWorld.getTiledMap()->m_selectedTileY,
+            1
+          );
+          break;
+
+        default:
+          break;
+        }
+
+        m_gameWorld.getTiledMap()->m_tiles.push_back(
+          Vector2I{
+            m_gameWorld.getTiledMap()->m_selectedTileX,
+            m_gameWorld.getTiledMap()->m_selectedTileY
+          });
+      }
     g_time()._update();
     ge_frame_mark();
     updateFrame();
@@ -205,7 +260,13 @@ RTSApplication::updateFrame() {
   axisMovement *= GameOptions::s_MapMovementSpeed * deltaTime;
 
   m_gameWorld.getTiledMap()->moveCamera(axisMovement.x, axisMovement.y);
-
+  
+  if (m_resetPos)
+  {
+    m_gameWorld.getTiledMap()->m_InitialPos = Vector2I::ZERO;
+    m_gameWorld.getTiledMap()->m_FinalPos = Vector2I::ZERO;
+    m_resetPos = false;
+  }
   //Update the world
   m_gameWorld.update(deltaTime);
 }
@@ -313,6 +374,125 @@ mainMenu(RTSApplication* pApp) {
       10240.0f);
 
     ImGui::Checkbox("Show grid", &GameOptions::s_MapShowGrid);
+  }
+  ImGui::End();
+
+  ImGui::Begin("Game Options");
+  {
+    const char* items[] = {  "Water", "Grass", "Marsh", "Obstacle" , "Inital Position", "Final Position", };
+    static const char* current_item = NULL;
+    ImGuiComboFlags flags = ImGuiComboFlags_NoArrowButton;
+
+    ImGuiStyle& style = ImGui::GetStyle();
+    float w = ImGui::CalcItemWidth();
+    float spacing = style.ItemInnerSpacing.x;
+    float button_sz = ImGui::GetFrameHeight();
+    ImGui::PushItemWidth(w - spacing * 2.0f - button_sz * 2.0f);
+    if (ImGui::BeginCombo("##custom combo", current_item))
+    {
+      for (int n = 0; n < IM_ARRAYSIZE(items); n++)
+      {
+        bool is_selected = (current_item == items[n]);
+        if (ImGui::Selectable(items[n], is_selected))
+        {
+          current_item = items[n];
+          pApp->getTerrainID() = n;
+        }
+        if (is_selected)
+        {
+          ImGui::SetItemDefaultFocus();
+        }
+      }
+      ImGui::EndCombo();
+    }
+    ImGui::PopItemWidth();
+    ImGui::SameLine(0, spacing);
+    if (ImGui::ArrowButton("##r", ImGuiDir_Left))
+    {
+    }
+    ImGui::SameLine(0, spacing);
+    if (ImGui::ArrowButton("##r", ImGuiDir_Right))
+    {
+    }
+    ImGui::SameLine(0, style.ItemInnerSpacing.x);
+    ImGui::Text("Custom Combo");
+  }
+  ImGui::End();
+
+  /**
+  * @brief Change pathfinding mode
+  */
+  ImGui::Begin("Game Options");
+  {
+    const char* items[] = { "DepthFirstSearch", "BreathFirstSearch", "BestFirstSearch" };
+    static const char* current_item = NULL;
+    ImGuiComboFlags flags = ImGuiComboFlags_NoArrowButton;
+
+    ImGuiStyle& style = ImGui::GetStyle();
+    float w = ImGui::CalcItemWidth();
+    float spacing = style.ItemInnerSpacing.x;
+    float button_sz = ImGui::GetFrameHeight();
+    ImGui::PushItemWidth(w - spacing * 2.0f - button_sz * 2.0f);
+    if (ImGui::BeginCombo("##Pathfinding Mode", current_item))
+    {
+      for (int n = 0; n < IM_ARRAYSIZE(items); n++)
+      {
+        bool is_selected = (current_item == items[n]);
+        if (ImGui::Selectable(items[n], is_selected))
+        {
+          current_item = items[n];
+          pApp->getPathfinderID() = n;
+          pApp->getWorld()->getTiledMap()->m_Pathfinding_state = n;
+        }
+        if (is_selected)
+        {
+          ImGui::SetItemDefaultFocus();
+        }
+      }
+      ImGui::EndCombo();
+    }
+    ImGui::PopItemWidth();
+    ImGui::SameLine(0, spacing);
+    if (ImGui::ArrowButton("##r", ImGuiDir_Left))
+    {
+    }
+    ImGui::SameLine(0, spacing);
+    if (ImGui::ArrowButton("##r", ImGuiDir_Right))
+    {
+    }
+    ImGui::SameLine(0, style.ItemInnerSpacing.x);
+    ImGui::Text("Custom Combo");
+  }
+  ImGui::End();
+
+  ImGui::Begin("Game Options");
+  {
+    if (ImGui::Button("Reset Positions")) {
+      pApp->getResetPosition() = true;
+    }
+    if (ImGui::Button("Start Search")) {
+      pApp->getWorld()->getTiledMap()->m_isSearching = true;
+    }
+  }
+  ImGui::End();
+
+  ImGui::Begin("Game Options");
+  {
+    if (ImGui::Button("Reset Pathfinding")) {
+      pApp->getWorld()->getTiledMap()->clearPathfindingSearch();
+    }
+  }
+  ImGui::End();
+
+  ImGui::Begin("Game Options");
+  {
+    if (pApp->getWorld()->getTiledMap()->mousePosition.x != -1 || pApp->getWorld()->getTiledMap()->mousePosition.y != -1)
+    {
+
+      ImGui::Text("Mouse x: %f", pApp->getWorld()->getTiledMap()->tileposX);
+      ImGui::Text("Mouse y: %f", pApp->getWorld()->getTiledMap()->tileposY);
+      ImGui::Text("Selected tile by index: %f", pApp->getWorld()->getTiledMap()->m_selectedTileByIndex);
+    }
   }
   ImGui::End();
 

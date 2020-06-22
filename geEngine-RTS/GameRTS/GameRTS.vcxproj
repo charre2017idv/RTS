@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -168,19 +168,33 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\AStar.cpp" />
+    <ClCompile Include="Source\BestFirstSearch.cpp" />
+    <ClCompile Include="Source\BFS.cpp" />
+    <ClCompile Include="Source\DFS.cpp" />
+    <ClCompile Include="Source\Dijkstra.cpp" />
     <ClCompile Include="Source\Externals\imgui-SFML.cpp" />
     <ClCompile Include="Source\Externals\imgui.cpp" />
     <ClCompile Include="Source\Externals\imgui_demo.cpp" />
     <ClCompile Include="Source\Externals\imgui_draw.cpp" />
     <ClCompile Include="Source\main.cpp" />
+    <ClCompile Include="Source\Pathfinder.cpp" />
     <ClCompile Include="Source\RTSApplication.cpp" />
     <ClCompile Include="Source\RTSConfig.cpp" />
+    <ClCompile Include="Source\RTSController.cpp" />
+    <ClCompile Include="Source\RTSPathfinding.cpp" />
     <ClCompile Include="Source\RTSTexture.cpp" />
     <ClCompile Include="Source\RTSTiledMap.cpp" />
+    <ClCompile Include="Source\RTSUnit.cpp" />
     <ClCompile Include="Source\RTSUnitType.cpp" />
     <ClCompile Include="Source\RTSWorld.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Include\AStar.h" />
+    <ClInclude Include="Include\BestFirstSearch.h" />
+    <ClInclude Include="Include\BFS.h" />
+    <ClInclude Include="Include\DFS.h" />
+    <ClInclude Include="Include\Dijkstra.h" />
     <ClInclude Include="Include\Externals\imconfig.h" />
     <ClInclude Include="Include\Externals\imgui-SFML.h" />
     <ClInclude Include="Include\Externals\imgui.h" />
@@ -190,10 +204,14 @@
     <ClInclude Include="Include\Externals\stb_truetype.h" />
     <ClInclude Include="Include\RTSApplication.h" />
     <ClInclude Include="Include\RTSConfig.h" />
+    <ClInclude Include="Include\RTSController.h" />
+    <ClInclude Include="Include\RTSPathfinding.h" />
     <ClInclude Include="Include\RTSTexture.h" />
     <ClInclude Include="Include\RTSTiledMap.h" />
+    <ClInclude Include="Include\RTSUnit.h" />
     <ClInclude Include="Include\RTSUnitType.h" />
     <ClInclude Include="Include\RTSWorld.h" />
+    <ClInclude Include="Source\Pathfinder.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

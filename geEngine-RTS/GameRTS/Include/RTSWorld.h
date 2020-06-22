@@ -2,8 +2,14 @@
 
 #include <gePrerequisitesUtil.h>
 #include <geVector2I.h>
-
+#include <RTSPathfinding.h>
+#include <DFS.h>
 #include <SFML/Graphics.hpp>
+#include <BFS.h>
+#include <BestFirstSearch.h>
+
+#include <RTSController.h>
+#include "Pathfinder.h"
 
 using namespace geEngineSDK;
 
@@ -52,4 +58,13 @@ class RTSWorld
   int8 m_activeWalkerIndex;
 
   sf::RenderTarget* m_pTarget;
+
+  RTSController m_controller;
+
+  //RTSPathfinding path;
+  Pathfinder m_pathfinder;
+  //DFS m_dfs;
+  //BFS m_bfs;
+  //BestFirstSearch m_bestFS;
+  int state = 1;
 };

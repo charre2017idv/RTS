@@ -36,10 +36,14 @@ RTSWorld::init(sf::RenderTarget* pTarget) {
   //Set the first walker as the active walker
   setCurrentWalker(m_walkersList.size() > 0 ? 0 : -1);
 */
+  
 
   RTSGame::RTSUnitType unitTypes;
   unitTypes.loadAnimationData(m_pTarget, 1);
 
+  m_controller.loadAssetsFromJson();
+
+  //.init(m_pTiledMap);
   return true;
 }
 
@@ -61,11 +65,14 @@ RTSWorld::destroy() {
 void
 RTSWorld::update(float deltaTime) {
   m_pTiledMap->update(deltaTime);
+
+  m_controller.update();
 }
 
 void
 RTSWorld::render() {
   m_pTiledMap->render(); 
+  
 }
 
 void
@@ -74,7 +81,7 @@ RTSWorld::updateResolutionData() {
     Vector2I appResolution = g_gameOptions().s_Resolution;
     
     m_pTiledMap->setStart(0, 0);
-    m_pTiledMap->setEnd(appResolution.x, appResolution.y - 175);
+    m_pTiledMap->setEnd(appResolution.x, appResolution.y /*- 175*/);
     
     //This ensures a clamp if necessary
     m_pTiledMap->moveCamera(0, 0);
