@@ -1,7 +1,7 @@
 #pragma once
 
 //Define only if the map should be isometric
-#define MAP_IS_ISOMETRIC
+//#define MAP_IS_ISOMETRIC
 
 #ifdef MAP_IS_ISOMETRIC
 //Tiles pixel size
@@ -28,11 +28,14 @@ class GameOptions : public Module<GameOptions>
   static Vector2 s_MapMovementSpeed;
 
   //World Values
-
+  static const int32 s_MapSizeX;
+  static const int32 s_MapSizeY;
+  static const int32 s_TileSizeX;
+  static const int32 s_TileSizeY;
   //Map Values
   static bool s_MapShowGrid;
   static Color s_MapGridColor;
-
+  static bool s_isMapIsometric;
   //Global Constants
   static const Vector2I TILEHALFSIZE;
   static const Vector2I BITSFHT_TILEHALFSIZE;

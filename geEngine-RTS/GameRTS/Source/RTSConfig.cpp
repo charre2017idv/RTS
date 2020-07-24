@@ -3,6 +3,7 @@
 Vector2I GameOptions::s_Resolution = Vector2I(1536, 864); //1366, 768
 Vector2 GameOptions::s_MapMovementSpeed = Vector2(1024.0f, 1024.0f);
 
+bool GameOptions::s_isMapIsometric = false;
 bool GameOptions::s_MapShowGrid = false;
 Color GameOptions::s_MapGridColor = Color(255, 0, 0, 255);
 

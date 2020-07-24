@@ -20,9 +20,13 @@
 #include <imgui.h>
 #include <imgui-sfml.h>
 
+#include <lua.hpp>
+
 #include "RTSConfig.h"
 #include "RTSApplication.h"
 #include "RTSTiledMap.h"
+
+
 
 void
 loadMapFromFile(RTSApplication* pApp);
@@ -69,11 +73,13 @@ RTSApplication::initSystems() {
     return; //Shouldn't do anything
   }
 
+  initScriptSystem();
+
   //Create the application window
   m_window = ge_new<sf::RenderWindow>(sf::VideoMode(GameOptions::s_Resolution.x,
                                                     GameOptions::s_Resolution.y),
                                       "RTS Game",
-                                      sf::Style::Fullscreen);
+                                      sf::Style::Titlebar);
   if (nullptr == m_window) {
     GE_EXCEPT(InvalidStateException, "Couldn't create Application Window");
   }
@@ -89,7 +95,6 @@ RTSApplication::initSystems() {
   }
 
   //m_window->setVerticalSyncEnabled(true);
-
   initGUI();
 }
 
@@ -100,6 +105,8 @@ RTSApplication::initGUI() {
 
 void
 RTSApplication::destroySystems() {
+  lua_close(m_luaState);
+
   ImGui::SFML::Shutdown();
 
   if (nullptr != m_window) {
@@ -133,15 +140,35 @@ RTSApplication::gameLoop() {
       {
         if (s_terrain == 4)
         {
-          m_gameWorld.getTiledMap()->m_InitialPos = { m_gameWorld.getTiledMap()->m_selectedTileX,
-            m_gameWorld.getTiledMap()->m_selectedTileY };
-          m_gameWorld.getTiledMap()->m_currentTileV2 = m_gameWorld.getTiledMap()->m_InitialPos;
-          m_gameWorld.getTiledMap()->m_path.push_front(m_gameWorld.getTiledMap()->m_currentTileV2);
+
+
+          m_gameWorld.getPathfinder()->m_InitialPos = 
+          { 
+            m_gameWorld.getTiledMap()->m_selectedTileX,
+            m_gameWorld.getTiledMap()->m_selectedTileY 
+          };
+          m_gameWorld.getTiledMap()->getMapGridCell(m_gameWorld.getTiledMap()->m_selectedTileX, m_gameWorld.getTiledMap()->m_selectedTileY).setTentativeCost(0);
+          m_gameWorld.getPathfinder()->m_currentTile =
+            m_gameWorld.getPathfinder()->m_InitialPos;
+          if (m_gameWorld.getPathfinder()->m_path.size() != 1)
+          {
+            m_gameWorld.getTiledMap()->setStartTile(m_gameWorld.getTiledMap()->m_selectedTileX,
+              m_gameWorld.getTiledMap()->m_selectedTileY);
+            m_gameWorld.getTiledMap()->getMapGridCell(m_gameWorld.getTiledMap()->m_selectedTileX, m_gameWorld.getTiledMap()->m_selectedTileY).setCost(0);
+            m_gameWorld.getPathfinder()->m_path.push_front(
+              m_gameWorld.getPathfinder()->m_currentTile);
+
+          }
         }
         if (s_terrain == 5)
         {
-          m_gameWorld.getTiledMap()->m_FinalPos = { m_gameWorld.getTiledMap()->m_selectedTileX,
-            m_gameWorld.getTiledMap()->m_selectedTileY };
+          m_gameWorld.getTiledMap()->setFinalTile(m_gameWorld.getTiledMap()->m_selectedTileX,
+            m_gameWorld.getTiledMap()->m_selectedTileY);
+          m_gameWorld.getPathfinder()->m_FinalPos = 
+          {
+            m_gameWorld.getTiledMap()->m_selectedTileX,
+            m_gameWorld.getTiledMap()->m_selectedTileY 
+          };
         }
 
         switch (s_terrain)
@@ -150,29 +177,44 @@ RTSApplication::gameLoop() {
           m_gameWorld.getTiledMap()->setCost(
             m_gameWorld.getTiledMap()->m_selectedTileX,
             m_gameWorld.getTiledMap()->m_selectedTileY,
-            3
+            1
           );
+          m_gameWorld.getTiledMap()->setType(m_gameWorld.getTiledMap()->m_selectedTileX,
+            m_gameWorld.getTiledMap()->m_selectedTileY, TERRAIN_TYPE::E::kGrass);
           break;
         case TERRAIN_TYPE::E::kWater :
+          m_gameWorld.getTiledMap()->m_water.push_back(Vector2I(
+            m_gameWorld.getTiledMap()->m_selectedTileX,
+            m_gameWorld.getTiledMap()->m_selectedTileY
+          ));
           m_gameWorld.getTiledMap()->setCost(
             m_gameWorld.getTiledMap()->m_selectedTileX,
             m_gameWorld.getTiledMap()->m_selectedTileY,
-            2
-          );
+            2 );
+          m_gameWorld.getTiledMap()->setType(m_gameWorld.getTiledMap()->m_selectedTileX,
+            m_gameWorld.getTiledMap()->m_selectedTileY, TERRAIN_TYPE::E::kWater);
           break;
         case TERRAIN_TYPE::E::kMarsh :
           m_gameWorld.getTiledMap()->setCost(
             m_gameWorld.getTiledMap()->m_selectedTileX,
             m_gameWorld.getTiledMap()->m_selectedTileY,
-            5
+            3
           );
+          m_gameWorld.getTiledMap()->setType(m_gameWorld.getTiledMap()->m_selectedTileX,
+            m_gameWorld.getTiledMap()->m_selectedTileY, TERRAIN_TYPE::E::kMarsh);
           break;
         case TERRAIN_TYPE::E::kObstacle :
+          m_gameWorld.getTiledMap()->m_obstacles.push_back(Vector2I(
+            m_gameWorld.getTiledMap()->m_selectedTileX,
+            m_gameWorld.getTiledMap()->m_selectedTileY
+          ));
           m_gameWorld.getTiledMap()->setCost(
             m_gameWorld.getTiledMap()->m_selectedTileX,
             m_gameWorld.getTiledMap()->m_selectedTileY,
-            1
+            10
           );
+          m_gameWorld.getTiledMap()->setType(m_gameWorld.getTiledMap()->m_selectedTileX,
+            m_gameWorld.getTiledMap()->m_selectedTileY, TERRAIN_TYPE::E::kObstacle);
           break;
 
         default:
@@ -374,6 +416,15 @@ mainMenu(RTSApplication* pApp) {
       10240.0f);
 
     ImGui::Checkbox("Show grid", &GameOptions::s_MapShowGrid);
+    ImGui::Checkbox("Show influence", &pApp->getWorld()->getTiledMap()->m_isPropoagation);
+    ImGui::SliderFloat("Decay",
+      &pApp->getWorld()->getTiledMap()->m_decay,
+      0.01f,
+      1.0f);
+    ImGui::SliderFloat("Momentum",
+      &pApp->getWorld()->getTiledMap()->m_momentum,
+      0.01f,
+      1.1f);
   }
   ImGui::End();
 
@@ -424,7 +475,7 @@ mainMenu(RTSApplication* pApp) {
   */
   ImGui::Begin("Game Options");
   {
-    const char* items[] = { "DepthFirstSearch", "BreathFirstSearch", "BestFirstSearch" };
+    const char* items[] = { "DepthFirstSearch", "BreathFirstSearch", "BestFirstSearch", "Dijkstra" };
     static const char* current_item = NULL;
     ImGuiComboFlags flags = ImGuiComboFlags_NoArrowButton;
 
@@ -442,7 +493,7 @@ mainMenu(RTSApplication* pApp) {
         {
           current_item = items[n];
           pApp->getPathfinderID() = n;
-          pApp->getWorld()->getTiledMap()->m_Pathfinding_state = n;
+          pApp->getWorld()->getPathfinder()->m_Pathfinding_state = n;
         }
         if (is_selected)
         {
@@ -467,11 +518,19 @@ mainMenu(RTSApplication* pApp) {
 
   ImGui::Begin("Game Options");
   {
-    if (ImGui::Button("Reset Positions")) {
-      pApp->getResetPosition() = true;
-    }
     if (ImGui::Button("Start Search")) {
-      pApp->getWorld()->getTiledMap()->m_isSearching = true;
+      pApp->getWorld()->getTiledMap()->clearMapTiles();
+      pApp->getWorld()->getTiledMap()->setTilesCost();
+      Vector2I pos = pApp->getWorld()->getPathfinder()->m_path[0];
+      pApp->getWorld()->getTiledMap()->getMapGridCell(pos.x, pos.y).setTentativeCost(0);
+      pApp->getWorld()->getTiledMap()->getMapGridCell(pos.x, pos.y).setCost(0);
+      pApp->getWorld()->getPathfinder()->clearPathfindingSearch2(*pApp->getWorld()->getTiledMap());
+      pApp->getWorld()->getPathfinder()->m_isSearching = true;
+     // pApp->getWorld()->getPathfinder()->m_currentTile = pos;
+      pApp->getWorld()->getPathfinder()->m_path.push_back(pos);
+      //pApp->getWorld()->getPathfinder()->m_FinalPos = { 
+      //  pApp->getWorld()->getTiledMap()->getFinalTile()->getIndexX(), 
+      //  pApp->getWorld()->getTiledMap()->getFinalTile()->getIndexY() };
     }
   }
   ImGui::End();
@@ -479,7 +538,9 @@ mainMenu(RTSApplication* pApp) {
   ImGui::Begin("Game Options");
   {
     if (ImGui::Button("Reset Pathfinding")) {
-      pApp->getWorld()->getTiledMap()->clearPathfindingSearch();
+      pApp->getWorld()->getTiledMap()->clearMapTiles();
+      pApp->getWorld()->getTiledMap()->setTilesCost();
+      pApp->getWorld()->getPathfinder()->clearPathfindingSearch(*pApp->getWorld()->getTiledMap());
     }
   }
   ImGui::End();
@@ -496,4 +557,49 @@ mainMenu(RTSApplication* pApp) {
   }
   ImGui::End();
 
+}
+
+/*
+int TestLUA(lua_State* L)
+{
+  int argUno = (int)lua_tointeger(L, 1);
+  int argDos = (int)lua_tointeger(L, 2);
+
+  lua_Integer result = argUno + argDos;
+  lua_pushinteger(L, result);
+  std::cout << result;
+  return 1;
+}
+*/
+
+int
+SetResolution(lua_State* L) {
+  int32 width = (int32)lua_tointeger(L, 1);
+  int32 height = (int32)lua_tointeger(L, 2);
+
+  GameOptions::s_Resolution.x = width;
+  GameOptions::s_Resolution.y = height;
+  
+  return 0;
+}
+
+bool
+RTSApplication::initScriptSystem() {
+  // Initialize LUA
+  m_luaState = luaL_newstate();
+  if (nullptr == m_luaState) {
+    return false;
+  }
+  //Add default libs
+  luaL_openlibs(m_luaState);
+
+  //Register a new function
+  lua_register(m_luaState,
+               "SetResolution",
+               &SetResolution);
+
+  luaL_dofile(m_luaState, "LUA/gameConfig.lua");
+  luaL_dostring(m_luaState, "ConfigGame()");
+
+  return true;
 }

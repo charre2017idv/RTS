@@ -40,6 +40,11 @@ class RTSWorld
     return m_pTiledMap;
   }
 
+  Pathfinder *
+    getPathfinder() {
+    return &m_pathfinder;
+  }
+
   void
   updateResolutionData();
 
@@ -66,5 +71,6 @@ class RTSWorld
   //DFS m_dfs;
   //BFS m_bfs;
   //BestFirstSearch m_bestFS;
+  float m_storedTime = 0.0f;
   int state = 1;
 };

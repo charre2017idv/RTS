@@ -4,7 +4,6 @@
 #include "RTSConfig.h"
 #include <geVector2.h>
 #include <geVector2I.h>
-#include "Pathfinder.h"
 #include <SFML/Graphics.hpp>
 #include "DFS.h"
 
@@ -18,12 +17,17 @@ namespace TERRAIN_TYPE {
     kGrass,
     kMarsh,
     kObstacle,
-    kNumObjects
+    kArrow,
+    kNumObjects, 
   };
 }
 
-class RTSTiledMap
+
+
+class RTSTiledMap 
 {
+  friend class Pathfinder;
+
   class MapTile
   {
    public:
@@ -83,12 +87,85 @@ class RTSTiledMap
       return m_parent;
     }*/
 
+    void 
+    setDistanceCost(float val) {
+      m_distanceCost = val;
+    }
+
+    float getDistanceCost() {
+      return m_distanceCost;
+    }
    
+    void 
+    setColor(int red, int green , int blue, int alpha)
+    {
+      m_color.r = red;
+      m_color.g = green;
+      m_color.b = blue;
+      m_color.a = alpha;
+    }
+
+    void
+    setColor(sf::Color _color)
+    {
+      m_color = _color;
+    }
+
+    sf::Color
+    getColor() {
+      return m_color;
+    }
+
+    int 
+    getIndexX() {
+      return m_indexX;
+    }
+
+    int 
+    getIndexY() {
+      return m_indexY;
+    }
+
+    void 
+    setIndex(int x, int y) {
+      m_indexX = x;
+      m_indexY = y;
+    }
+
+    float
+    getTentativeCost() {
+      return m_tentativeCost;
+    }
+    
+    void 
+    setTentativeCost(float _tentCost) {
+      m_tentativeCost = _tentCost;
+    }
+
+    void
+    setParentTile(MapTile* _mapTile) {
+      m_parentMapTile = _mapTile;
+    }
+
+    MapTile* 
+    getParenTile() {
+      return m_parentMapTile;
+    }
+
    private:
+     sf::Color m_color = {255,255,255,255};
      Vector2I m_position;
-    uint8 m_idType;
-    int8 m_cost;
-    bool m_isVisited = false;
+     MapTile* m_parentMapTile = nullptr;
+     uint8 m_idType = TERRAIN_TYPE::E::kGrass;
+     int8 m_cost;
+     bool m_isVisited = false;
+     float m_distanceCost = INT_MAX;
+     int m_indexX = -1;
+     int m_indexY = -1;
+  public:
+    float m_influence = 0;
+    Vector<MapTile*> m_connections;
+    float m_tentativeCost = float(INT_MAX);
     //MapTile* m_parent;
   };
 
@@ -212,10 +289,13 @@ class RTSTiledMap
   void 
   colorCell(const int32 x, const int32 y);
 
+  void 
+  setCellSprite(int32& x, int32& y);
+
   FrameVector<sf::Vertex>
   getCell();
 
-  MapTile
+  MapTile&
     getMapGridCell(int x, int y)
   {
     GE_ASSERT((x >= 0) && (x < m_mapSize.x) && (y >= 0) && (y < m_mapSize.y));
@@ -228,38 +308,68 @@ class RTSTiledMap
   }
 
   sf::Vector2f getMouseOnRenderTarget();
-  /** 
-   * @brief 
-   * @param 
-   * @return 
-   * @bug 
-   */
-  void
-  depthFirstSearch();
-
-  void
-  breathFirstSearch();
-  
-  void 
-  BestFirstSearch();
 
   bool isSearching() {
     return m_isSearching;
   }
 
-  void
-  setNeighbors(Vector2I& pos);
+  void 
+  clearMapTiles();
 
   void
-  searchOnGrid(int32 _x, int32 _y);
+  propagateInfluence();
 
+  float 
+  lerp(float a, float b, float f);
+
+  void RTSTiledMap::setTilesCost()
+  {
+    for (int32 i = 0; i < m_mapGrid.size(); i++)
+    {
+      if (i >= 0 && i < m_mapGrid.size())
+      {
+        m_mapGrid[i].setTentativeCost((float)INT_MAX);
+        switch (m_mapGrid[i].getType())
+        {
+        case 0:
+          m_mapGrid[i].setCost(3);
+          break;
+        case 1:
+          m_mapGrid[i].setCost(1);
+          break;
+        case 2:
+          m_mapGrid[i].setCost(5);
+          break;
+        case 3:
+          m_mapGrid[i].setCost(20);
+          break;
+        default:
+          break;
+        }
+      }
+    }
+  }
+  //
+
+  MapTile* getStartTile() {
+    return m_start;
+  }
+  
+  MapTile* getFinalTile() {
+    return m_start;
+  }
+
+  void setStartTile(int32 indexX, int32 indexY) {
+    m_start = &m_mapGrid[(indexY * m_mapSize.x) + indexX];
+  }
+  
+  void setFinalTile(int32 indexX, int32 indexY) {
+    m_final = &m_mapGrid[(indexY * m_mapSize.x) + indexX];
+  }
 
   bool 
-  checkIfIsFinalPos(Vector2I& pos);
+  checkForBresenhamLine(int32 initTile, int32 finalTile);
 
-  void 
-  clearPathfindingSearch();
-  //
  private:                                             
                                                        
   //int currentx, currenty;
@@ -298,7 +408,9 @@ class RTSTiledMap
   int m_Pathfinding_state = 0;
   bool m_isSearching = false;
   Vector<bool> m_VisitiedTiles;
-  Pathfinder m_pathfinder;
+  Vector<Vector2I> m_obstacles;
+  Vector<Vector2I> m_water;
+  //Pathfinder m_pathfinder;
   Vector<Vector2I> m_visitedPos;
   public:
   deque<Vector2I> m_path;
@@ -306,4 +418,13 @@ class RTSTiledMap
    // Coordinates
   int m_directionX[8] = { 1, 1, 0,-1,-1,-1,  0,  1 };  
   int m_directionY[8] = { 0,-1,-1,-1, 0, 1,  1,  1 };  
+
+  float m_decay = 0.15;
+  float m_momentum = 0.70f;
+
+  bool m_isPropoagation = false;
+
+  MapTile* m_start;
+  MapTile* m_final;
+  Vector<MapTile*> m_BresenhamPathRegister;
 };

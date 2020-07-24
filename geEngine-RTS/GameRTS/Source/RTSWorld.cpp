@@ -44,6 +44,7 @@ RTSWorld::init(sf::RenderTarget* pTarget) {
   m_controller.loadAssetsFromJson();
 
   //.init(m_pTiledMap);
+  m_pathfinder.init(*m_pTiledMap);
   return true;
 }
 
@@ -67,12 +68,34 @@ RTSWorld::update(float deltaTime) {
   m_pTiledMap->update(deltaTime);
 
   m_controller.update();
+  m_storedTime += deltaTime;
+  if (m_pTiledMap->m_isPropoagation) {
+    if (m_storedTime > .2f) {
+      m_pTiledMap->propagateInfluence();
+      m_storedTime = 0;
+    }
+
+  }
+
 }
 
 void
 RTSWorld::render() {
   m_pTiledMap->render(); 
-  
+  // Base class for the pathfinder and render here!
+  m_pathfinder.render(*m_pTiledMap);
+
+//   if (m_pathfinder.m_rest) {
+//     for (int32 i = 0; i < m_pathfinder.m_visitedPos.size(); i++) {
+//       m_pTiledMap->getMapGridCell(m_pathfinder.m_visitedPos[i].x, m_pathfinder.m_visitedPos[i].y).setColor(255, 255, 255, 255);
+//     }
+//     for (int32 i = 0; i < m_pTiledMap->m_obstacles.size(); i++) {
+//       m_pTiledMap->getMapGridCell(m_pTiledMap->m_obstacles[i].x, m_pTiledMap->m_obstacles[i].y).setColor(255, 255, 255, 255);
+//       //m_pTiledMap->getMapGridCell(m_pTiledMap->m_obstacles[i].x, m_pTiledMap->m_obstacles[i].y).setCost(0);
+//     }
+//     m_pathfinder.m_rest = false;
+//   }
+
 }
 
 void

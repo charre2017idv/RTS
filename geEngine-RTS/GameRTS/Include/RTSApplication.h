@@ -5,6 +5,8 @@
 
 using namespace geEngineSDK;
 
+class lua_State;
+
 namespace sf{
   class RenderWindow;
   class Font;
@@ -55,6 +57,9 @@ class RTSApplication
    void
    initGUI();
 
+   bool
+   initScriptSystem();
+
    void
    destroySystems();
 
@@ -84,4 +89,6 @@ class RTSApplication
    float m_fpsTimer;
    float m_fpsCounter;
    float m_framesPerSecond;
+   
+   lua_State* m_luaState = nullptr;
 };
