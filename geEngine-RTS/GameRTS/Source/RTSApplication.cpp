@@ -466,7 +466,7 @@ mainMenu(RTSApplication* pApp) {
     {
     }
     ImGui::SameLine(0, style.ItemInnerSpacing.x);
-    ImGui::Text("Custom Combo");
+    ImGui::Text("Terrain");
   }
   ImGui::End();
 
@@ -512,9 +512,53 @@ mainMenu(RTSApplication* pApp) {
     {
     }
     ImGui::SameLine(0, style.ItemInnerSpacing.x);
-    ImGui::Text("Custom Combo");
+    ImGui::Text("Pathfinding");
   }
   ImGui::End();
+
+  ImGui::Begin("Game Options");
+  {
+    const char* items[] = { "LAND", "AQUATIC", "AIR",};
+    static const char* current_item = NULL;
+    ImGuiComboFlags flags = ImGuiComboFlags_NoArrowButton;
+
+    ImGuiStyle& style = ImGui::GetStyle();
+    float w = ImGui::CalcItemWidth();
+    float spacing = style.ItemInnerSpacing.x;
+    float button_sz = ImGui::GetFrameHeight();
+    ImGui::PushItemWidth(w - spacing * 2.0f - button_sz * 2.0f);
+    if (ImGui::BeginCombo("##Unit Quality Mode", current_item))
+    {
+      for (int n = 0; n < IM_ARRAYSIZE(items); n++)
+      {
+        bool is_selected = (current_item == items[n]);
+        if (ImGui::Selectable(items[n], is_selected))
+        {
+          current_item = items[n];
+          pApp->getPathfinderID() = n;
+          pApp->getWorld()->getPathfinder()->Unit.setQuality(n);
+        }
+        if (is_selected)
+        {
+          ImGui::SetItemDefaultFocus();
+        }
+      }
+      ImGui::EndCombo();
+    }
+    ImGui::PopItemWidth();
+    ImGui::SameLine(0, spacing);
+    if (ImGui::ArrowButton("##r", ImGuiDir_Left))
+    {
+    }
+    ImGui::SameLine(0, spacing);
+    if (ImGui::ArrowButton("##r", ImGuiDir_Right))
+    {
+    }
+    ImGui::SameLine(0, style.ItemInnerSpacing.x);
+    ImGui::Text("Unit Quality");
+  }
+  ImGui::End();
+
 
   ImGui::Begin("Game Options");
   {
@@ -526,7 +570,7 @@ mainMenu(RTSApplication* pApp) {
       pApp->getWorld()->getTiledMap()->getMapGridCell(pos.x, pos.y).setCost(0);
       pApp->getWorld()->getPathfinder()->clearPathfindingSearch2(*pApp->getWorld()->getTiledMap());
       pApp->getWorld()->getPathfinder()->m_isSearching = true;
-     // pApp->getWorld()->getPathfinder()->m_currentTile = pos;
+      pApp->getWorld()->getPathfinder()->m_currentTile = pos;
       pApp->getWorld()->getPathfinder()->m_path.push_back(pos);
       //pApp->getWorld()->getPathfinder()->m_FinalPos = { 
       //  pApp->getWorld()->getTiledMap()->getFinalTile()->getIndexX(), 

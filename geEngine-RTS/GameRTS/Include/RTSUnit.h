@@ -73,6 +73,12 @@ struct AnimationData
 	Vector2 sourceSize;
 };
 
+enum UnitTypeQuality {
+	LAND,
+	AQUATIC,
+	AIR
+};
+
 
 class RTSUnit
 {
@@ -94,6 +100,13 @@ public:
 	 */
 	void 
 	clearUnitRawData();
+
+	UnitTypeQuality getQuality() {
+		return m_quality;
+	}
+	void setQuality(uint32 _quality) {
+		m_quality = (UnitTypeQuality)_quality;
+	}
 public:
 	string imagePNGPath;
  /**
@@ -116,5 +129,6 @@ public:
  vector<AnimationData> m_unitRawData;
  sf::RenderTarget* m_pTarget;
  RTSTexture m_textMap;
+ UnitTypeQuality m_quality;
 };
 

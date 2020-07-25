@@ -18,6 +18,7 @@ void Pathfinder::init(RTSTiledMap& _pTiledMap)
 {
   m_VisitiedTiles.resize(_pTiledMap.getMapSize().x * _pTiledMap.getMapSize().y);
   m_mapSize = _pTiledMap.getMapSize();
+  Unit.setQuality(UnitTypeQuality::LAND);
 }
 
 void Pathfinder::update(float deltaTime)
@@ -93,23 +94,17 @@ void Pathfinder::depthFirstSearch(RTSTiledMap & _pTiledMap)
     }
     // Check if the current tile is the final position
     if (checkIfIsFinalPos(m_currentTile)) {
-      //_pTiledMap.getMapGridCell(m_currentTile.x, m_currentTile.y).setColor(0, 0, 255,255);
       m_LastPosMapTile = &_pTiledMap.getMapGridCell(m_currentTile.x, m_currentTile.y);
       m_isSearching = false;
       m_isGettingBacktrack = true;
       return;
     }
-    //m_frontierNodes.clear();
     // Mark the current tile as checked
     _pTiledMap.getMapGridCell(m_currentTile.x, m_currentTile.y).setColor(sf::Color::Green);
-   // _pTiledMap.getMapGridCell(m_currentTile.x, m_currentTile.y).setColor(0, 255, 255, 255);
-   // _pTiledMap.setCell(m_currentTile.x, m_currentTile.y, sf::Color::Magenta);
     // Store the current tile with the last value of the stack
     m_currentTile = m_path.back();
     // Mark the new current tile 
-    //_pTiledMap.setCell(m_currentTile.x, m_currentTile.y, sf::Color::Cyan);
     _pTiledMap.getMapGridCell(m_currentTile.x, m_currentTile.y).setColor(sf::Color::Cyan);
-    //_pTiledMap.getMapGridCell(m_currentTile.x, m_currentTile.y).setColor(0, 0, 255, 255);
     // Store the current tile to be draw
     m_visitedPos.push_back(m_currentTile);
    
@@ -129,47 +124,187 @@ void Pathfinder::depthFirstSearch(RTSTiledMap & _pTiledMap)
 
 void Pathfinder::breathFirstSearch(RTSTiledMap& _pTiledMap)
 {
-  // Check if the stack is empty
+  //// Check if the stack is empty
+  //if (m_path.empty()) {
+  //  m_isSearching = false;
+  //  return;
+  //}
+  //// Check if the current tile is the final position
+  //if (checkIfIsFinalPos(m_currentTile)) {
+  //  m_LastPosMapTile = &_pTiledMap.getMapGridCell(m_currentTile.x, m_currentTile.y);
+  //  m_isGettingBacktrack = true;
+  //  m_isSearching = false;
+  //  //_pTiledMap.getMapGridCell(m_currentTile.x, m_currentTile.y).setColor(0, 0, 255, 255);
+  //  return;
+  //}
+  //// Mark the current tile as checked
+  //_pTiledMap.getMapGridCell(m_currentTile.x, m_currentTile.y).setColor(sf::Color::Green);
+  ////_pTiledMap.getMapGridCell(m_currentTile.x, m_currentTile.y).setColor(0, 255, 255, 255);
+  ////_pTiledMap.setCell(m_currentTile.x, m_currentTile.y, sf::Color::Magenta);
+  //// Store the current tile with the last value of the stack
+  //m_currentTile = m_path.front();
+  //// Mark the new current tile 
+  ////_pTiledMap.getMapGridCell(m_currentTile.x, m_currentTile.y).setColor(0, 0, 0, 255);
+  //_pTiledMap.getMapGridCell(m_currentTile.x, m_currentTile.y).setColor(sf::Color::Cyan);
+  ////_pTiledMap.setCell(m_currentTile.x, m_currentTile.y, sf::Color::Cyan);
+  //// Get the current value to be checkt in the 8 directions of the tile
+  //int currentx = m_currentTile.x;
+  //int currenty = m_currentTile.y;
+  //// Check all the visited front tiles
+  ///*while (m_VisitiedTiles[(currenty * m_mapSize.x) + currentx]) {
+  //  m_path.pop_front();
+  //  m_currentTile = m_path.front();
+  //  currentx = m_currentTile.x;
+  //  currenty = m_currentTile.y;
+  //}*/
+  //// Mark the current tile as visited
+  //m_VisitiedTiles[(currenty * m_mapSize.x) + currentx] = true;
+  //// Store the current tile to be draw
+  //m_visitedPos.push_back(m_currentTile);
+  //// Drop the first value of the stack
+  //m_path.pop_front();
+  //// Make a search on every direction with the current tile
+  //searchOnGrid(currentx, currenty, _pTiledMap);
+
+ // Check if the stack is empty
   if (m_path.empty()) {
     m_isSearching = false;
     return;
   }
+
+  if (m_pathCost.empty()) {
+    for (int32 i = 0; i < m_path.size(); i++)
+    {
+      m_pathCost.push_back(0);
+
+    }
+  }
   // Check if the current tile is the final position
   if (checkIfIsFinalPos(m_currentTile)) {
+    //_pTiledMap.getMapGridCell(m_currentTile.x, m_currentTile.y).setColor(0, 0, 255, 255);
     m_LastPosMapTile = &_pTiledMap.getMapGridCell(m_currentTile.x, m_currentTile.y);
     m_isGettingBacktrack = true;
     m_isSearching = false;
-    //_pTiledMap.getMapGridCell(m_currentTile.x, m_currentTile.y).setColor(0, 0, 255, 255);
+    //clearPathfindingSearch(_pTiledMap);
     return;
   }
+
   // Mark the current tile as checked
   _pTiledMap.getMapGridCell(m_currentTile.x, m_currentTile.y).setColor(sf::Color::Green);
-  //_pTiledMap.getMapGridCell(m_currentTile.x, m_currentTile.y).setColor(0, 255, 255, 255);
-  //_pTiledMap.setCell(m_currentTile.x, m_currentTile.y, sf::Color::Magenta);
-  // Store the current tile with the last value of the stack
-  m_currentTile = m_path.front();
-  // Mark the new current tile 
-  //_pTiledMap.getMapGridCell(m_currentTile.x, m_currentTile.y).setColor(0, 0, 0, 255);
-  _pTiledMap.getMapGridCell(m_currentTile.x, m_currentTile.y).setColor(sf::Color::Cyan);
-  //_pTiledMap.setCell(m_currentTile.x, m_currentTile.y, sf::Color::Cyan);
   // Get the current value to be checkt in the 8 directions of the tile
   int currentx = m_currentTile.x;
   int currenty = m_currentTile.y;
   // Check all the visited front tiles
-  while (m_VisitiedTiles[(currenty * m_mapSize.x) + currentx]) {
+  /*while (m_VisitiedTiles[(currenty * m_mapSize.x) + currentx]) {
     m_path.pop_front();
     m_currentTile = m_path.front();
     currentx = m_currentTile.x;
     currenty = m_currentTile.y;
-  }
+  }*/
   // Mark the current tile as visited
   m_VisitiedTiles[(currenty * m_mapSize.x) + currentx] = true;
   // Store the current tile to be draw
   m_visitedPos.push_back(m_currentTile);
   // Drop the first value of the stack
   m_path.pop_front();
+  m_pathCost.pop_front();
   // Make a search on every direction with the current tile
-  searchOnGrid(currentx, currenty, _pTiledMap);
+    // Calculate total distance to neighbors
+
+  for (int i = 7; i > -1; --i) {
+
+    int x = currentx + m_directionX[i];
+    int y = currenty + m_directionY[i];
+
+    if (x >= 0 && x < m_mapSize.x && y >= 0 && y < m_mapSize.y) {
+      // Check if unit can walk in land
+      if (Unit.getQuality() == UnitTypeQuality::LAND &&
+        _pTiledMap.getMapGridCell(currentx, currenty).getType() != TERRAIN_TYPE::kWater &&
+        _pTiledMap.getMapGridCell(currentx, currenty).getType() != TERRAIN_TYPE::kObstacle) {
+        
+        if (!m_VisitiedTiles[(y * m_mapSize.x) + x]) {
+            // Mark frontier node
+            _pTiledMap.getMapGridCell(x, y).setColor(sf::Color::Red);
+            // Store the frontier nodes
+            m_frontierNodes.push_back(Vector2I(x, y));
+            // Store the path
+            m_path.push_back(Vector2I(x, y));
+            //m_pathCost.push_back(tentativeCost);
+
+            m_dijkstraPath.insert(&_pTiledMap.getMapGridCell(x, y));
+            // Set Parent tile
+            _pTiledMap.getMapGridCell(x, y).setParentTile(&_pTiledMap.getMapGridCell(currentx, currenty));
+
+            //_pTiledMap.getMapGridCell(i,j).
+            m_traceback.push_back(m_path);
+            // m_nodes.push_back(&Vector2I(x, y));
+          //// Get the tentative cost of the tile relative to the movement
+          //float tileCost = _pTiledMap.getMapGridCell(x, y).getTentativeCost();
+          //// Tentative cost from the actual tile
+          //float tentativeCost = _pTiledMap.getMapGridCell(currentx, currenty).getTentativeCost() + _pTiledMap.getMapGridCell(x, y).getCost();
+
+          //// If the tile is check or is less than the tile cost 
+          //if (tentativeCost < tileCost) {
+          //  // Set the new tentative cost 
+          //  _pTiledMap.getMapGridCell(x, y).setTentativeCost(tentativeCost);
+          //}
+        }
+      }
+      // Check if unit can walk in land
+      if (Unit.getQuality() == UnitTypeQuality::AQUATIC &&
+        _pTiledMap.getMapGridCell(currentx, currenty).getType() != TERRAIN_TYPE::kGrass &&
+        _pTiledMap.getMapGridCell(currentx, currenty).getType() != TERRAIN_TYPE::kMarsh &&
+        _pTiledMap.getMapGridCell(currentx, currenty).getType() != TERRAIN_TYPE::kObstacle) {
+        searchOnNeighbors(_pTiledMap, x, y, currentx, currenty);
+      }
+      // Check if unit can walk in land
+      if (Unit.getQuality() == UnitTypeQuality::AIR) {
+        searchOnNeighbors(_pTiledMap, x, y, currentx, currenty);
+      }
+
+
+
+      //if (!m_VisitiedTiles[(y * m_mapSize.x) + x] &&
+      //  _pTiledMap.getMapGridCell(currentx, currenty).getCost() != 20 ) {
+      //  // Get the tentative cost of the tile relative to the movement
+      //  float tileCost = _pTiledMap.getMapGridCell(x, y).getTentativeCost();
+      //  // Tentative cost from the actual tile
+      //  float tentativeCost = _pTiledMap.getMapGridCell(currentx, currenty).getTentativeCost() + _pTiledMap.getMapGridCell(x, y).getCost();
+      //  
+      //  // If the tile is check or is less than the tile cost 
+      //  if (tentativeCost < tileCost) {
+      //    // Set the new tentative cost 
+      //    _pTiledMap.getMapGridCell(x, y).setTentativeCost(tentativeCost);
+      //    // Mark frontier node
+      //    _pTiledMap.getMapGridCell(x, y).setColor(sf::Color::Red);
+      //    // Store the frontier nodes
+      //    m_frontierNodes.push_back(Vector2I(x, y));
+      //    // Store the path
+      //    m_path.push_back(Vector2I(x, y));
+      //    m_pathCost.push_back(tentativeCost);
+
+      //    m_dijkstraPath.insert(&_pTiledMap.getMapGridCell(x, y));
+      //    // Set Parent tile
+      //    _pTiledMap.getMapGridCell(x, y).setParentTile(&_pTiledMap.getMapGridCell(currentx, currenty));
+      //    
+      //    //_pTiledMap.getMapGridCell(i,j).
+      //    m_traceback.push_back(m_path);
+      //    // m_nodes.push_back(&Vector2I(x, y));
+      //  }
+
+      //}
+    }
+  }
+
+  if (m_dijkstraPath.empty())
+  {
+    m_isSearching = false;
+    return;
+  }
+
+  RTSTiledMap::MapTile* current = *m_dijkstraPath.begin();
+  m_currentTile = { current->getIndexX(), current->getIndexY() };
+  m_dijkstraPath.erase(m_dijkstraPath.begin());
 }
 
 void Pathfinder::bestFirstSearch(RTSTiledMap& _pTiledMap)
@@ -248,14 +383,6 @@ void Pathfinder::Dijktra(RTSTiledMap& _pTiledMap)
 
   // Mark the current tile as checked
   _pTiledMap.getMapGridCell(m_currentTile.x, m_currentTile.y).setColor(sf::Color::Green);
-  //_pTiledMap.getMapGridCell(m_currentTile.x, m_currentTile.y).setColor(0, 255, 255, 255);
-  //_pTiledMap.setCell(m_currentTile.x, m_currentTile.y, sf::Color::Magenta);
-  // Store the current tile with the last value of the stack
-  //m_currentTile = m_path.front();
-  // Mark the new current tile 
-  //_pTiledMap.getMapGridCell(m_currentTile.x, m_currentTile.y).setColor(0, 0, 0, 255);
- // _pTiledMap.getMapGridCell(m_currentTile.x, m_currentTile.y).setColor(sf::Color::Cyan);
-  //_pTiledMap.setCell(m_currentTile.x, m_currentTile.y, sf::Color::Cyan);
   // Get the current value to be checkt in the 8 directions of the tile
   int currentx = m_currentTile.x;
   int currenty = m_currentTile.y;
@@ -282,34 +409,55 @@ void Pathfinder::Dijktra(RTSTiledMap& _pTiledMap)
     int y = currenty + m_directionY[i];
 
     if (x >= 0 && x < m_mapSize.x && y >= 0 && y < m_mapSize.y) {
-      if (!m_VisitiedTiles[(y * m_mapSize.x) + x] &&
-        _pTiledMap.getMapGridCell(currentx, currenty).getCost() != 20) {
-        // Get the tentative cost of the tile relative to the movement
-        float tileCost = _pTiledMap.getMapGridCell(x, y).getTentativeCost();
-        // Tentative cost from the actual tile
-        float tentativeCost = _pTiledMap.getMapGridCell(currentx, currenty).getTentativeCost() + _pTiledMap.getMapGridCell(x, y).getCost();
-        
-        // If the tile is check or is less than the tile cost 
-        if (tentativeCost < tileCost) {
-          // Set the new tentative cost 
-          _pTiledMap.getMapGridCell(x, y).setTentativeCost(tentativeCost);
-          // Mark frontier node
-          _pTiledMap.getMapGridCell(x, y).setColor(sf::Color::Red);
-          // Store the frontier nodes
-          m_frontierNodes.push_back(Vector2I(x, y));
-          // Store the path
-          m_path.push_back(Vector2I(x, y));
-          m_pathCost.push_back(tentativeCost);
-
-          m_dijkstraPath.insert(&_pTiledMap.getMapGridCell(x, y));
-          // Set Parent tile
-          _pTiledMap.getMapGridCell(x, y).setParentTile(&_pTiledMap.getMapGridCell(currentx, currenty));
-          //_pTiledMap.getMapGridCell(i,j).
-          m_traceback.push_back(m_path);
-          // m_nodes.push_back(&Vector2I(x, y));
-        }
-
+      // Check if unit can walk in land
+      if (Unit.getQuality() == UnitTypeQuality::LAND &&
+        _pTiledMap.getMapGridCell(currentx, currenty).getType() != TERRAIN_TYPE::kWater && 
+        _pTiledMap.getMapGridCell(currentx, currenty).getType() != TERRAIN_TYPE::kObstacle) {
+        searchOnNeighbors(_pTiledMap, x, y, currentx, currenty);
       }
+      // Check if unit can walk in land
+      if (Unit.getQuality() == UnitTypeQuality::AQUATIC &&
+        _pTiledMap.getMapGridCell(currentx, currenty).getType() != TERRAIN_TYPE::kGrass &&
+        _pTiledMap.getMapGridCell(currentx, currenty).getType() != TERRAIN_TYPE::kMarsh &&
+        _pTiledMap.getMapGridCell(currentx, currenty).getType() != TERRAIN_TYPE::kObstacle) {
+        searchOnNeighbors(_pTiledMap, x, y, currentx, currenty);
+      }
+      // Check if unit can walk in land
+      if (Unit.getQuality() == UnitTypeQuality::AIR) {
+        searchOnNeighbors(_pTiledMap, x, y, currentx, currenty);
+      }
+
+
+
+      //if (!m_VisitiedTiles[(y * m_mapSize.x) + x] &&
+      //  _pTiledMap.getMapGridCell(currentx, currenty).getCost() != 20 ) {
+      //  // Get the tentative cost of the tile relative to the movement
+      //  float tileCost = _pTiledMap.getMapGridCell(x, y).getTentativeCost();
+      //  // Tentative cost from the actual tile
+      //  float tentativeCost = _pTiledMap.getMapGridCell(currentx, currenty).getTentativeCost() + _pTiledMap.getMapGridCell(x, y).getCost();
+      //  
+      //  // If the tile is check or is less than the tile cost 
+      //  if (tentativeCost < tileCost) {
+      //    // Set the new tentative cost 
+      //    _pTiledMap.getMapGridCell(x, y).setTentativeCost(tentativeCost);
+      //    // Mark frontier node
+      //    _pTiledMap.getMapGridCell(x, y).setColor(sf::Color::Red);
+      //    // Store the frontier nodes
+      //    m_frontierNodes.push_back(Vector2I(x, y));
+      //    // Store the path
+      //    m_path.push_back(Vector2I(x, y));
+      //    m_pathCost.push_back(tentativeCost);
+
+      //    m_dijkstraPath.insert(&_pTiledMap.getMapGridCell(x, y));
+      //    // Set Parent tile
+      //    _pTiledMap.getMapGridCell(x, y).setParentTile(&_pTiledMap.getMapGridCell(currentx, currenty));
+      //    
+      //    //_pTiledMap.getMapGridCell(i,j).
+      //    m_traceback.push_back(m_path);
+      //    // m_nodes.push_back(&Vector2I(x, y));
+      //  }
+
+      //}
     }
   }
 
@@ -356,38 +504,70 @@ void Pathfinder::searchOnGrid(int32 _x, int32 _y, RTSTiledMap& _pTiledMap)
     int y = _y + m_directionY[i];
 
     if (x >= 0 && x < m_mapSize.x && y >= 0 && y < m_mapSize.y) {
-      if (!m_VisitiedTiles[(y * m_mapSize.x) + x] &&
-        _pTiledMap.getMapGridCell(_x, _y).getCost() != 20) {
-        if (m_isDijkstra) {
-          // Check the cost of the distance of the tile
-          float tileCost = _pTiledMap.getMapGridCell(x, y).getDistanceCost();
-          // Calculate the distance of the tiles
-          float tmpCost = _pTiledMap.getMapGridCell(_x, _y).getDistanceCost() + 
-                          _pTiledMap.getMapGridCell(x, y).getCost();
-          // Check if the distance is lower than the cost of the current tile
-          if (tmpCost < tileCost) {
-            m_frontierNodes.push_back(Vector2I(x, y));
-            // Set the tile with the distance value and draw the current tile that
-            // has been searched
-            _pTiledMap.getMapGridCell(_x, _y).setDistanceCost(tmpCost);
-            //_pTiledMap.setCell(x, y, sf::Color::Red);
-            _pTiledMap.getMapGridCell(x, y).setColor(155, 0, 0, 155);
-            //m_path.push_back(Vector2I(x, y));
-          }
-        }
-        else {
-        //_pTiledMap.setCell(x, y, sf::Color::Red);
-          _pTiledMap.getMapGridCell(x, y).setColor(sf::Color::Red);
-        //_pTiledMap.getMapGridCell(x, y).setColor(155, 0, 0, 255);
-        //_pTiledMap.setCellSprite(m_currentTile.x, m_currentTile.y);
+      // Check if unit can walk in land
+      if (Unit.getQuality() == UnitTypeQuality::LAND &&
+        _pTiledMap.getMapGridCell(x, y).getType() != TERRAIN_TYPE::kWater &&
+        _pTiledMap.getMapGridCell(x, y).getType() != TERRAIN_TYPE::kObstacle) {
+
+        _pTiledMap.getMapGridCell(x, y).setColor(sf::Color::Red);
         m_path.push_back(Vector2I(x, y));
         m_traceback.push_back(m_path);
-        
         _pTiledMap.getMapGridCell(x, y).setParentTile(&_pTiledMap.getMapGridCell(_x, _y));
-        
-        }
-       // m_nodes.push_back(&Vector2I(x, y));
+
+
       }
+      // Check if unit can walk in land
+      if (Unit.getQuality() == UnitTypeQuality::AQUATIC &&
+        _pTiledMap.getMapGridCell(x, y).getType() != TERRAIN_TYPE::kGrass &&
+        _pTiledMap.getMapGridCell(x, y).getType() != TERRAIN_TYPE::kMarsh &&
+        _pTiledMap.getMapGridCell(x, y).getType() != TERRAIN_TYPE::kObstacle) {
+
+        _pTiledMap.getMapGridCell(x, y).setColor(sf::Color::Red);
+        m_path.push_back(Vector2I(x, y));
+        m_traceback.push_back(m_path);
+        _pTiledMap.getMapGridCell(x, y).setParentTile(&_pTiledMap.getMapGridCell(_x, _y));
+
+
+      }
+      // Check if unit can walk in land
+      if (Unit.getQuality() == UnitTypeQuality::AIR) {
+
+        _pTiledMap.getMapGridCell(x, y).setColor(sf::Color::Red);
+        m_path.push_back(Vector2I(x, y));
+        m_traceback.push_back(m_path);
+        _pTiledMap.getMapGridCell(x, y).setParentTile(&_pTiledMap.getMapGridCell(_x, _y));
+      }
+    }
+  }
+}
+
+void Pathfinder::searchOnNeighbors(RTSTiledMap& _pTiledMap, int32 x, int32 y, int32 currentx, int32 currenty)
+{
+  if (!m_VisitiedTiles[(y * m_mapSize.x) + x]) {
+    // Get the tentative cost of the tile relative to the movement
+    float tileCost = _pTiledMap.getMapGridCell(x, y).getTentativeCost();
+    // Tentative cost from the actual tile
+    float tentativeCost = _pTiledMap.getMapGridCell(currentx, currenty).getTentativeCost() + _pTiledMap.getMapGridCell(x, y).getCost();
+
+    // If the tile is check or is less than the tile cost 
+    if (tentativeCost < tileCost) {
+      // Set the new tentative cost 
+      _pTiledMap.getMapGridCell(x, y).setTentativeCost(tentativeCost);
+      // Mark frontier node
+      _pTiledMap.getMapGridCell(x, y).setColor(sf::Color::Red);
+      // Store the frontier nodes
+      m_frontierNodes.push_back(Vector2I(x, y));
+      // Store the path
+      m_path.push_back(Vector2I(x, y));
+      m_pathCost.push_back(tentativeCost);
+
+      m_dijkstraPath.insert(&_pTiledMap.getMapGridCell(x, y));
+      // Set Parent tile
+      _pTiledMap.getMapGridCell(x, y).setParentTile(&_pTiledMap.getMapGridCell(currentx, currenty));
+
+      //_pTiledMap.getMapGridCell(i,j).
+      m_traceback.push_back(m_path);
+      // m_nodes.push_back(&Vector2I(x, y));
     }
   }
 }

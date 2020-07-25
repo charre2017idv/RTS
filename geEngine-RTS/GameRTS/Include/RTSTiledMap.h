@@ -332,7 +332,7 @@ class RTSTiledMap
         switch (m_mapGrid[i].getType())
         {
         case 0:
-          m_mapGrid[i].setCost(3);
+          m_mapGrid[i].setCost(1);
           break;
         case 1:
           m_mapGrid[i].setCost(1);

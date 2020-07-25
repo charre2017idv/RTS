@@ -5,7 +5,8 @@
 #include <geVector2.h>
 #include <geVector2I.h>
 #include <RTSTiledMap.h>
-
+#include "RTSUnitType.h"
+#include <RTSUnit.h>
 namespace COORDS {
   //static Vector2I PreCalc_MidResolution;
   //static Vector2I PreCalc_ScreenDeface;
@@ -235,6 +236,9 @@ class Pathfinder
   */
   void
   searchOnGrid(int32 _x, int32 _y, RTSTiledMap& _pTiledMap);
+
+  void
+  searchOnNeighbors(RTSTiledMap& _pTiledMap, int32 x, int32 y, int32 currentx, int32 currenty);
   /** 
   * @brief 
   * @param 
@@ -377,4 +381,6 @@ class Pathfinder
 
    Vector<RTSTiledMap::MapTile*> m_BresenhamPathRegister;
    Vector<RTSTiledMap::MapTile*> m_BresenhamPathLine;
+
+   RTSUnit Unit;
 };

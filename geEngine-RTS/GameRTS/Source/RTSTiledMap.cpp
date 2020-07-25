@@ -706,7 +706,35 @@ RTSTiledMap::render() {
 
         }
       }
+      if (m_mapGrid[(iterY * m_mapSize.x) + iterX].getType() == TERRAIN_TYPE::kArrow)
+      {
+        if (m_mapGrid[(iterY * m_mapSize.x) + iterX].getParenTile() != nullptr)
+        {
+          Vector2I tmpPos = m_mapGrid[(iterY * m_mapSize.x) + iterX].getParenTile()->getPosition();
+          Vector2I EndPos = m_mapGrid[(iterY * m_mapSize.x) + iterX].getPosition();
+          Vector2I result = EndPos - tmpPos;
+          if (result.x == 1 && result.y == -1) {
+            refTexture.setRotation(Degree(-45));
+          }
+          if (result.x == -1 && result.y == -1) {
+            refTexture.setRotation(Degree(-85));
+          }
+          if (result.x == -1 && result.y == 0) {
+            refTexture.setRotation(Degree(180));
+          }
+          if (result.x == 0 && result.y == 1) {
+            refTexture.setRotation(Degree(90));
+          }
+          if (result.x == 0 && result.y == -1) {
+            refTexture.setRotation(Degree(-90));
+          }
+          if (result.x == 1 && result.y == 1) {
+            refTexture.setRotation(Degree(45));
+           //refTexture.setSrcRect(0,0, TILESIZE_X, TILESIZE_Y);
+          }
 
+        }
+      }
       refTexture.setColor(tmpColor.r, tmpColor.g, tmpColor.b, tmpColor.a);
       refTexture.setPosition(tmpX, tmpY);
       refTexture.setSrcRect(clipRect.x, clipRect.y, TILESIZE_X, TILESIZE_Y);
