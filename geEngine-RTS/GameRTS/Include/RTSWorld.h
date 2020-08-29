@@ -10,6 +10,8 @@
 
 #include <RTSController.h>
 #include "Pathfinder.h"
+#include <RTSUnit.h>
+#include <RTSPlayer.h>
 
 using namespace geEngineSDK;
 
@@ -51,6 +53,29 @@ class RTSWorld
   void
   setCurrentWalker(const int8 index);
 
+  Vector<RTSUnit> &
+  getUnits() {
+    return m_Units;
+  }
+
+  int32 & getUnitCounter() {
+    return m_unitCounter;
+  }
+  
+  bool & getIfIsSettingUnit() {
+    return m_isSettingUnit;
+  }
+  void setSelectedUnit(int32 unitID) {
+    tmpSelectedUnit = m_Units[0];
+  }
+
+  void setSelectedUnitIndex(int32 unitID) {
+    m_selectedUnitIndex = unitID;
+  }
+
+  int32& getSelectedUnitIndex() {
+    return m_selectedUnitIndex;
+  }
  private:
   RTSTiledMap* m_pTiledMap;
   //List<RTSUnitType*> m_lstUnitTypes;
@@ -73,4 +98,10 @@ class RTSWorld
   //BestFirstSearch m_bestFS;
   float m_storedTime = 0.0f;
   int state = 1;
+  int32 m_unitCounter = 0;
+  Vector<RTSUnit> m_Units;
+  Vector<RTSPlayer> m_players;
+  bool m_isSettingUnit;
+  RTSUnit tmpSelectedUnit;
+  int32 m_selectedUnitIndex = -1;
 };

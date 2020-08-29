@@ -85,6 +85,12 @@ RTSWorld::render() {
   // Base class for the pathfinder and render here!
   m_pathfinder.render(*m_pTiledMap);
 
+  for (uint32 i = 0; i < m_Units.size(); i++) {
+    if (m_Units[i].m_position.x > 0 && m_Units[i].m_position.y > 0) {
+      m_pTiledMap->getMapGridCell(m_Units[i].m_position.x, m_Units[i].m_position.y).setColor(sf::Color::Magenta);
+    }
+  }
+
 //   if (m_pathfinder.m_rest) {
 //     for (int32 i = 0; i < m_pathfinder.m_visitedPos.size(); i++) {
 //       m_pTiledMap->getMapGridCell(m_pathfinder.m_visitedPos[i].x, m_pathfinder.m_visitedPos[i].y).setColor(255, 255, 255, 255);

@@ -16,42 +16,45 @@
 #include "RTSTexture.h"
 using json = nlohmann::json;
 
-enum UnitActions
+namespace ANIMATIONS {
+	enum E {
+		kIDLE = 0,
+		kRUN,
+		kATTACK,
+		kDIE,
+		kNUM_ANIMATIONS
+	};
+}
+
+namespace DIRECTIONS {
+	enum E {
+		kN = 0,
+		kNW,
+		kW,
+		kSW,
+		kS,
+		kSE,
+		kE,
+		kNE,
+		kNUM_DIRECTIONS
+	};
+}
+
+struct AnimationFrame
 {
-	NORTH,
-	NORTH_WEST,
-	SOUTH,
-	SOUTH_WEST,
-	WEST,
-	// IDLE
-	IDLE_NORTH,
-	IDLE_NORTH_WEST,
-	IDLE_SOUTH,
-	IDLE_SOUTH_WEST,
-	IDLE_WEST,
-	// ATTACK
-	ATTACK_NORTH,
-	ATTACK_NORTH_WEST,
-	ATTACK_SOUTH,
-	ATTACK_SOUTH_WEST,
-	ATTACK_WEST,
-	// RUN
-	RUN_NORTH,
-	RUN_NORTH_WEST,
-	RUN_SOUTH,
-	RUN_SOUTH_WEST,
-	RUN_WEST
+	int32 x;
+	int32 y;
+	int32 w;
+	int32 h;
+	bool bSwap;
 };
 
-enum UnitType
+struct Animation
 {
-	ARCHER,
-	CASTILIAN_KNIGHT,
-	CROSSBOW,
-	ENGLISH_KNIGHT,
-	FRENCH_KNIGHT,
-	HAND_GUNNER,
-	HEAVY_CAVALRY
+	uint32 numFrames;
+	float duration;
+	String name;
+	Vector<AnimationFrame> frames[DIRECTIONS::kNUM_DIRECTIONS];
 };
 
 enum SpriteData
@@ -95,40 +98,39 @@ public:
 	 */
 	vector<AnimationData>
 	getUnitRawData(string _unitName, String _textureMapPath);
-	/**
-	 * @brief 
-	 */
-	void 
-	clearUnitRawData();
 
 	UnitTypeQuality getQuality() {
 		return m_quality;
 	}
+
 	void setQuality(uint32 _quality) {
 		m_quality = (UnitTypeQuality)_quality;
 	}
+
+	static RTSUnit*
+	loadFromFile(uint32 idUnitType);
+	
+	void
+	loadAnimationData(sf::RenderTarget* pTarget, uint32 idUnitType);
+
+private:
 public:
 	string imagePNGPath;
  /**
   * @brief Unit type ID 
   */
- UnitType m_unitType;
+ //UnitType m_unitType;
  /**
  * @brief 
  */
- string m_name;
- /**
- * @brief 
- */
- json m_jsonFile;
- std::string m_Data;
- vector<AnimationData> Units;
- /**
-  * @brief Idle containers
-  */
- vector<AnimationData> m_unitRawData;
- sf::RenderTarget* m_pTarget;
+
  RTSTexture m_textMap;
  UnitTypeQuality m_quality;
+ Vector2I m_position = Vector2I(-1,-1);
+	
+ uint32 m_id;
+ string m_name;
+ Vector<Animation> m_animationFrames;
+ RTSTexture m_texture;
+ sf::RenderTarget* m_pTarget;
 };
-

@@ -21,11 +21,11 @@
 #include <imgui-sfml.h>
 
 #include <lua.hpp>
+#include <sol.hpp>
 
 #include "RTSConfig.h"
 #include "RTSApplication.h"
 #include "RTSTiledMap.h"
-
 
 
 void
@@ -227,6 +227,25 @@ RTSApplication::gameLoop() {
             m_gameWorld.getTiledMap()->m_selectedTileY
           });
       }
+      if (sf::Mouse::isButtonPressed(sf::Mouse::Middle))
+      {
+        
+        Vector2I lastUnitPos = {
+          m_gameWorld.getUnits()[m_gameWorld.getSelectedUnitIndex()].m_position.x,  
+          m_gameWorld.getUnits()[m_gameWorld.getSelectedUnitIndex()].m_position.y };
+        if (lastUnitPos.x > -1 && lastUnitPos.y > -1) {
+          m_gameWorld.getTiledMap()->getMapGridCell(lastUnitPos.x, lastUnitPos.y).setColor(sf::Color::White);
+        }
+        // Set Position of selected unit
+        if (m_gameWorld.getSelectedUnitIndex() != -1)
+        {
+          m_gameWorld.getUnits()[m_gameWorld.getSelectedUnitIndex()].m_position =
+            Vector2I{
+             m_gameWorld.getTiledMap()->m_selectedTileX,
+             m_gameWorld.getTiledMap()->m_selectedTileY
+          };
+        }
+      }
     g_time()._update();
     ge_frame_mark();
     updateFrame();
@@ -398,7 +417,7 @@ mainMenu(RTSApplication* pApp) {
 
       ImGui::EndMenu();
     }
-    
+
     ImGui::EndMainMenuBar();
   }
 
@@ -430,7 +449,7 @@ mainMenu(RTSApplication* pApp) {
 
   ImGui::Begin("Game Options");
   {
-    const char* items[] = {  "Water", "Grass", "Marsh", "Obstacle" , "Inital Position", "Final Position", };
+    const char* items[] = { "Water", "Grass", "Marsh", "Obstacle" , "Inital Position", "Final Position", };
     static const char* current_item = NULL;
     ImGuiComboFlags flags = ImGuiComboFlags_NoArrowButton;
 
@@ -518,7 +537,7 @@ mainMenu(RTSApplication* pApp) {
 
   ImGui::Begin("Game Options");
   {
-    const char* items[] = { "LAND", "AQUATIC", "AIR",};
+    const char* items[] = { "LAND", "AQUATIC", "AIR", };
     static const char* current_item = NULL;
     ImGuiComboFlags flags = ImGuiComboFlags_NoArrowButton;
 
@@ -601,6 +620,48 @@ mainMenu(RTSApplication* pApp) {
   }
   ImGui::End();
 
+  ImGui::Begin("Units");
+  if (ImGui::Button("New unit"))
+  {
+    RTSUnit newUnit;
+    newUnit.m_id = pApp->getWorld()->getUnitCounter();
+    newUnit.m_position = Vector2I(pApp->getWorld()->getTiledMap()->m_selectedTileX,
+      pApp->getWorld()->getTiledMap()->m_selectedTileY);
+    pApp->getWorld()->getUnits().push_back(newUnit);
+    pApp->getWorld()->getUnitCounter() += 1;
+  }
+
+  ImGui::AlignTextToFramePadding();
+  if (pApp->getWorld()->getUnits().size() >= 1)
+  {
+    bool treeopen = ImGui::TreeNodeEx("Units", ImGuiTreeNodeFlags_AllowItemOverlap);
+    if (treeopen)
+    {
+      for (int i = 0; i < pApp->getWorld()->getUnits().size(); ++i) {
+        if (ImGui::Button("+")) {
+          pApp->getWorld()->setSelectedUnitIndex(pApp->getWorld()->getUnits()[i].m_id
+          );
+        }
+        if (ImGui::IsItemHovered()) {
+          ImGui::SetTooltip( to_string( pApp->getWorld()->getUnits()[i].m_id).c_str());
+        }
+        ImGui::SameLine();
+        ImGui::Text("Unit");
+      }
+      ImGui::TreePop();
+    }
+  }
+  
+  if (ImGui::InputInt("SelectUnit", &pApp->getWorld()->getSelectedUnitIndex()))
+  {
+  }
+  if (ImGui::Button("Select"))
+  {
+    pApp->getWorld()->setSelectedUnitIndex(
+      pApp->getWorld()->getUnits()[pApp->getWorld()->getSelectedUnitIndex()].m_id
+    );
+  }
+  ImGui::End();
 }
 
 /*
@@ -644,6 +705,20 @@ RTSApplication::initScriptSystem() {
 
   luaL_dofile(m_luaState, "LUA/gameConfig.lua");
   luaL_dostring(m_luaState, "ConfigGame()");
+
+  // Set environment
+  sol::state lua;
+  lua.open_libraries();
+  sol::environment my_env(lua, sol::create);
+  my_env["var"] = 50;
+  my_env["print"] = lua["print"];
+  sol::environment my_envOther(lua, sol::create, lua.globals());
+  my_envOther["var"] = 443;
+  lua.script("print(var)", my_env);
+  lua.script("print(var)", my_envOther);
+
+
+
 
   return true;
 }

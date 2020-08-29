@@ -1,5 +1,8 @@
 #include "RTSUnit.h"
 #include "RTSTexture.h"
+#include <geFileSystem.h>
+#include <geDataStream.h>
+#include <Externals/json.hpp>
 
 RTSUnit::RTSUnit()
 {
@@ -11,65 +14,157 @@ RTSUnit::~RTSUnit()
 
 void RTSUnit::createUnit(const char* _path)
 {
-  std::ifstream i(_path);
-  i >> m_jsonFile;
-  for (json::iterator it = m_jsonFile["frames"].begin(); it != m_jsonFile["frames"].end(); ++it)
-  {
-    AnimationData tmpUnit;
-    string buffer;
-    tmpUnit.name = it.key();
-    int index = 0;
-    while (true)
-    {
-      if (tmpUnit.name[index] == '/' ) {
-        index++;
-      }
-      else {
-        buffer += tmpUnit.name[index];
-        index++;
-        if (tmpUnit.name[index] == '/' || tmpUnit.name[index] == '\0') {
-          tmpUnit.spriteData.push_back(buffer);
-          buffer.clear();
-          if (tmpUnit.name[index] == '\0') {
-            break;
-          }
-        }
-      }
-      
-    }
-    tmpUnit.frame.x = it.value()["frame"]["x"];
-    tmpUnit.frame.y = it.value()["frame"]["y"];
-    tmpUnit.frame.z = it.value()["frame"]["w"];
-    tmpUnit.frame.w = it.value()["frame"]["h"];
-    tmpUnit.rotated = it.value()["rotated"];
-    tmpUnit.trimed = it.value()["trimmed"];
-    tmpUnit.spriteSourceSize.x = it.value()["spriteSourceSize"]["x"];
-    tmpUnit.spriteSourceSize.y = it.value()["spriteSourceSize"]["y"];
-    tmpUnit.spriteSourceSize.z = it.value()["spriteSourceSize"]["w"];
-    tmpUnit.spriteSourceSize.w = it.value()["spriteSourceSize"]["h"];
-    tmpUnit.sourceSize.x = it.value()["sourceSize"]["w"];
-    tmpUnit.sourceSize.y = it.value()["sourceSize"]["h"];
+  //std::ifstream i(_path);
+  //i >> m_jsonFile;
+  //for (json::iterator it = m_jsonFile["frames"].begin(); it != m_jsonFile["frames"].end(); ++it)
+  //{
+  //  AnimationData tmpUnit;
+  //  string buffer;
+  //  tmpUnit.name = it.key();
+  //  int index = 0;
+  //  while (true)
+  //  {
+  //    if (tmpUnit.name[index] == '/' ) {
+  //      index++;
+  //    }
+  //    else {
+  //      buffer += tmpUnit.name[index];
+  //      index++;
+  //      if (tmpUnit.name[index] == '/' || tmpUnit.name[index] == '\0') {
+  //        tmpUnit.spriteData.push_back(buffer);
+  //        buffer.clear();
+  //        if (tmpUnit.name[index] == '\0') {
+  //          break;
+  //        }
+  //      }
+  //    }
+  //    
+  //  }
+  //  tmpUnit.frame.x = it.value()["frame"]["x"];
+  //  tmpUnit.frame.y = it.value()["frame"]["y"];
+  //  tmpUnit.frame.z = it.value()["frame"]["w"];
+  //  tmpUnit.frame.w = it.value()["frame"]["h"];
+  //  tmpUnit.rotated = it.value()["rotated"];
+  //  tmpUnit.trimed = it.value()["trimmed"];
+  //  tmpUnit.spriteSourceSize.x = it.value()["spriteSourceSize"]["x"];
+  //  tmpUnit.spriteSourceSize.y = it.value()["spriteSourceSize"]["y"];
+  //  tmpUnit.spriteSourceSize.z = it.value()["spriteSourceSize"]["w"];
+  //  tmpUnit.spriteSourceSize.w = it.value()["spriteSourceSize"]["h"];
+  //  tmpUnit.sourceSize.x = it.value()["sourceSize"]["w"];
+  //  tmpUnit.sourceSize.y = it.value()["sourceSize"]["h"];
 
-    //m_sunitType = spriteData[SpriteData::Unit_Type];
-    //m_unitSpritePath = spriteData[SpriteData::UnitPath];
-    //m_unitActionDir = spriteData[SpriteData::UnitActionDir];
-    Units.push_back(tmpUnit);
-    
-  }
+  //  //m_sunitType = spriteData[SpriteData::Unit_Type];
+  //  //m_unitSpritePath = spriteData[SpriteData::UnitPath];
+  //  //m_unitActionDir = spriteData[SpriteData::UnitActionDir];
+  //  Units.push_back(tmpUnit);
+  //  
+  //}
 }
 
 vector<AnimationData> RTSUnit::getUnitRawData(string _unitName, String _textureMapPath)
 {
-  for (int i = 0; i < Units.size(); i++) {
-    if (Units[i].spriteData[SpriteData::Unit_Type] == _unitName) {
-      m_unitRawData.push_back(Units[i]);
-    }
-  }  
-  //m_textMap.loadFromFile(m_pTarget, _textureMapPath);
-  return m_unitRawData;
+  //for (int i = 0; i < Units.size(); i++) {
+  //  if (Units[i].spriteData[SpriteData::Unit_Type] == _unitName) {
+  //    m_unitRawData.push_back(Units[i]);
+  //  }
+  //}  
+  ////m_textMap.loadFromFile(m_pTarget, _textureMapPath);
+  //return m_unitRawData;
+  return vector<AnimationData>();
 }
 
-void RTSUnit::clearUnitRawData()
+RTSUnit* RTSUnit::loadFromFile(uint32 idUnitType)
 {
-  m_unitRawData.clear();
+  return nullptr;
 }
+
+void 
+RTSUnit::loadAnimationData(sf::RenderTarget* pTarget, uint32 idUnitType) {
+  struct tmpStruct
+  {
+    uint32 id;
+    Map<String, uint32> animation;
+  };
+
+  Path filePath = "RTS/assets/game_objects/units/";
+  Path jsonPath = filePath;
+  jsonPath += toString(idUnitType) + ".json";
+  DataStreamPtr fData = FileSystem::openFile(jsonPath);
+  auto myJSON = json::parse(fData->getAsString());
+
+  auto& frames = myJSON["frames"];
+  Map<String, tmpStruct> unitsMap;
+  Map<String, uint32> animsMap;
+
+  for (auto iter = frames.begin(); iter != frames.end(); ++iter) {
+    Vector<String> parsedKey = StringUtil::split(iter.key().c_str(), "/");
+    Vector<String> parsedAnim = StringUtil::split(parsedKey[1], "_");
+
+    //Categorize all the animations in the file
+    tmpStruct& tmpObj = unitsMap[parsedKey[0]];
+    tmpObj.id = static_cast<uint32>(unitsMap.size());
+    if (tmpObj.animation.end() == tmpObj.animation.find(parsedAnim[0])) {
+      tmpObj.animation[parsedAnim[0]] = 0;
+    }
+
+    //Add a frame only on one direction to avoid repetition
+    if (0 == StringUtil::compare(parsedAnim[1], String("N"))) {
+      tmpObj.animation[parsedAnim[0]]++;
+    }
+  }
+
+  String dirSubIndex[DIRECTIONS::kNUM_DIRECTIONS] = {
+    "N", "NW", "W", "SW", "S", "SW", "W", "NW"
+  };
+
+  bool invertedSubIndex[DIRECTIONS::kNUM_DIRECTIONS] = {
+    false, false, false, false, false, true, true, true
+  };
+
+  //Read the information pertinent from the main json and copy to the class
+  m_id = idUnitType;
+
+  for (auto& unit : unitsMap) {
+    if (idUnitType == unit.second.id) {
+      m_name = unit.first;
+      m_animationFrames.resize(unit.second.animation.size());
+
+      uint32 count = 0;
+      for (auto& animation : unit.second.animation) {
+        Animation& locAnim = m_animationFrames[count];
+        locAnim.name = animation.first;
+        locAnim.numFrames = animation.second;
+        locAnim.duration = 1.0f; //Seconds
+
+        for (uint32 i = 0; i < DIRECTIONS::kNUM_DIRECTIONS; ++i) {
+          locAnim.frames[i].resize(locAnim.numFrames);
+
+          for (uint32 j = 0; j < locAnim.numFrames; ++j) {
+            StringStream frameName;
+            String fullKey;
+            frameName << m_name << "/" << locAnim.name << "_";
+            frameName << dirSubIndex[i] << "/";
+            frameName << locAnim.name << dirSubIndex[i];
+            frameName << std::setfill('0') << std::setw(4) << (j + 1);
+            frameName << ".png";
+            frameName >> fullKey;
+
+            auto thisFrame = frames[fullKey.c_str()]["frame"];
+            locAnim.frames[i][j].x = thisFrame["x"].get<int32>();
+            locAnim.frames[i][j].y = thisFrame["y"].get<int32>();
+            locAnim.frames[i][j].w = thisFrame["w"].get<int32>();
+            locAnim.frames[i][j].h = thisFrame["h"].get<int32>();
+            locAnim.frames[i][j].bSwap = invertedSubIndex[i];
+          }
+        }
+        ++count;
+      }
+      break;
+    }
+  }
+
+  //Load the texture for this unit type
+  m_pTarget = pTarget;
+  m_texture.loadFromFile(pTarget, filePath.toString() + "units.png");
+}
+
